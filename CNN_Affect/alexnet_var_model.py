@@ -51,7 +51,7 @@ def alexnet_var_model(image_size=128,
         model.compile(optimizer='adam', loss='mean_squared_error',
                       metrics=['accuracy'])
     else:
-        model.add(Dense(8, activation='softmax'))
+        model.add(Dense(10, activation='softmax'))
         model.compile(optimizer='adam',
                       loss='categorical_crossentropy',  metrics=['accuracy'])
 

@@ -2,7 +2,6 @@ import os
 import matplotlib.pyplot as plt
 from Training_Procedure import *
 from alexnet_var_model import *
-<< << << < HEAD
 
 
 def viz_res(trainLoss, trainAcc, valLoss, valAcc, savename=None):

@@ -6,7 +6,6 @@ from keras.layers import Activation, BatchNormalization, Conv2D, Dense, Dropout,
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
-
 # from tensorflow.keras.utils import image_dataset_from_directory
 # import autokeras as ak
 

@@ -61,12 +61,15 @@ def main():
     val_loss = hist['val_loss']
     val_acc = hist['val_accuracy']
 
+    print("Test accuracy: ", test_accuracy)
+    print("total parameter count: ", params_cnt)
+
     viz_res(train_loss, train_acc, val_loss, val_acc, 'alexnet_var_20220227')
 
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
-# with tf.device('/gpu:0'):
-#     main()
+with tf.device('/gpu:0'):
+    main()
 
 # print(tf.__version__)
 
@@ -102,5 +105,5 @@ valAcc = [
     0.6183, 0.7297, 0.6314, 0.5856, 0.7162, 0.6534
 ]
 
-viz_res(trainLoss=trainLoss, trainAcc=trainAcc, valLoss=valLoss,
-        valAcc=valAcc, savename='alexnet_var_20220227')
+# viz_res(trainLoss=trainLoss, trainAcc=trainAcc, valLoss=valLoss,
+#         valAcc=valAcc, savename='alexnet_var_20220227')

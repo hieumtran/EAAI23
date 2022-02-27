@@ -35,6 +35,10 @@ class Training_Procedure:
 
     #     return np.asarray(images)
 
+    # function to normalize the image data from [0, 255] to [0, 1]
+    def data_normalize(self, image):
+        return image.as_numpy() / 255.
+
     # have yet known how to load data for regression
     #   since the label values must be type integers
 
@@ -51,7 +55,7 @@ class Training_Procedure:
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size,
         )
-        return train_data
+        return train_data.apply(self.data_normalize)
 
     def load_test_data(self):
         test_data = tf.keras.preprocessing.image_dataset_from_directory(
@@ -68,6 +72,12 @@ class Training_Procedure:
     def process_classification(self):
 
         train_data = self.load_train_data()
+
+        print(train_data.element_spec)
+        for i in train_data:
+            print(i)
+            break
+
         val_data = self.load_train_data(sub_set="validation")
         test_data = self.load_test_data()
 

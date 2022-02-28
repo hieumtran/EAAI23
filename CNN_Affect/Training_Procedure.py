@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
+# from PIL import Image
 from keras.layers import Activation, BatchNormalization, Conv2D, Dense, Dropout, Flatten, GaussianDropout, GlobalAveragePooling2D, MaxPooling2D
 from keras.models import Sequential, load_model
 # from tensorflow.keras.utils import image_dataset_from_directory
 import tensorflow as tf
 # import autokeras as ak
 import timeit
-import gc
+# import gc
 
 
 class Training_Procedure:
@@ -69,18 +69,8 @@ class Training_Procedure:
         )
         return test_data
 
-    def process_classification(self):
-
-        train_data = self.load_train_data()
-
-        print(train_data.element_spec)
-        for i in train_data:
-            print(i)
-            break
-
-        val_data = self.load_train_data(sub_set="validation")
-        test_data = self.load_test_data()
-
+    # Training function
+    def training(self, train_data, val_data) :
         # Training process
         startTime = timeit.default_timer()
         hist = self.model.fit(train_data,
@@ -88,13 +78,37 @@ class Training_Procedure:
                               epochs=self.epochs,
                               batch_size=self.batch_size, verbose=1)
         print('Training time:', timeit.default_timer() - startTime)
+        
+        return hist
 
+    # Testing function
+    def testing(self, test_data) :
         # Testing
         startTime = timeit.default_timer()
-        accuracy = self.model.evaluate(test_data)
+        testLoss, testAccuracy = self.model.evaluate(test_data)
         print('Testing time:', timeit.default_timer() - startTime)
 
-        return hist.history, accuracy, self.model.count_params()
+        return testLoss, testAccuracy
+
+    def process_classification(self):
+
+        train_data = self.load_train_data()
+
+        # print(train_data.element_spec)
+        # for i in train_data:
+        #     print(i)
+        #     break
+
+        val_data = self.load_train_data(sub_set="validation")
+        test_data = self.load_test_data()
+
+        # Training
+        hist = self.training(train_data=train_data, val_data=val_data)
+        
+        # Testing
+        testLoss, testAccuracy = self.testing(test_data=test_data)
+
+        return hist.history, testLoss, testAccuracy, self.model.count_params()
 
     def process(self):
         if (not self.regression):

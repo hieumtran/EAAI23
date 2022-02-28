@@ -34,6 +34,7 @@ class Training_Procedure:
         train_data = tf.keras.preprocessing.image_dataset_from_directory(
             self.train_input_path,
             labels=list(self.train_output.astype(int)),
+            label_mode='categorical',
             color_mode='rgb',
             # Use 20% data as testing data.
             validation_split=val_split,
@@ -43,19 +44,20 @@ class Training_Procedure:
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size
         )
-        return train_data.apply(lambda x, y: (x/255., y))
+        return train_data.map(lambda x, y: (x/255., y))
 
     def load_test_data(self):
         test_data = tf.keras.preprocessing.image_dataset_from_directory(
             self.test_input_path,
             labels=list(self.test_output.astype(int)),
+            label_mode='categorical',
             color_mode='rgb',
             # Set seed to ensure the same split when loading testing data.
             seed=123,
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size
         )
-        return test_data.apply(lambda x, y: (x/255., y))
+        return test_data.map(lambda x, y: (x/255., y))
 
     # Training function
     def training(self):

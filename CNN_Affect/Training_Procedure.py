@@ -1,12 +1,5 @@
-import numpy as np
-import matplotlib.pyplot as plt
-# from PIL import Image
-from keras.layers import Activation, BatchNormalization, Conv2D, Dense, Dropout, Flatten, GaussianDropout, GlobalAveragePooling2D, MaxPooling2D
-from keras.models import Sequential, load_model
 import tensorflow as tf
-# import autokeras as ak
 import timeit
-# import gc
 
 
 class Training_Procedure:
@@ -39,7 +32,6 @@ class Training_Procedure:
             # Use 20% data as testing data.
             validation_split=val_split,
             subset=sub_set,
-            # Set seed to ensure the same split when loading testing data.
             seed=123,
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size
@@ -52,7 +44,6 @@ class Training_Procedure:
             labels=list(self.test_output.astype(int)),
             label_mode='categorical',
             color_mode='rgb',
-            # Set seed to ensure the same split when loading testing data.
             seed=123,
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size

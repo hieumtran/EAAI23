@@ -32,7 +32,8 @@ def viz_res(trainLoss, trainAcc, valLoss, valAcc, savename=None):
 
 
 def main():
-    model = alexnet_var_model()
+    # model = alexnet_var_model()
+    model = tf.keras.models.load_model(path + "EAAI23/AlexNet_Variant_20220226")
     train_input_path = path + "EAAI23/data/train_set/New Folder"
     train_output = np.load(path + "EAAI23/data/trainval_class.npy")
 
@@ -55,7 +56,7 @@ def main():
     )
 
     hist, testLoss, testAccuracy, params_cnt = training_procedure.process()
-    model.save('AlexNet_Variant_20220227')
+    model.save('AlexNet_Variant_20220226_27')
 
     train_loss = hist['loss']
     train_acc = hist['accuracy']
@@ -68,12 +69,12 @@ def main():
     viz_res(train_loss, train_acc, val_loss, val_acc, 'alexnet_var_20220227')
 
 
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 with tf.device('/gpu:0'):
     main()
 
 # print(tf.__version__)
 
-# print(tf.config.list_physical_devices('GPU'))
+# print(len(tf.config.list_physical_devices('GPU')))
+# print(tf.test.is_gpu_available(cuda_only=True))
 

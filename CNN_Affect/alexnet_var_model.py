@@ -19,6 +19,7 @@ def alexnet_var_model(image_size=128,
                           128, (3, 3)], [128, (3, 3)]],
                       dropout=[0.2, 0.5]):
 
+    tf.random.set_seed(1234)
     model = Sequential()
 
     # Convolution blocks
@@ -26,10 +27,10 @@ def alexnet_var_model(image_size=128,
         if (i == 0):
             # the package requires input_shape when Conv2D is the first layer of the model
             model.add(Conv2D(conv_shapes[i][0], conv_shapes[i][1], input_shape=(
-                image_size, image_size, 3), padding='same', use_bias=False))
+                image_size, image_size, 3), padding='same', use_bias=True))
         else:
             model.add(
-                Conv2D(conv_shapes[i][0], conv_shapes[i][1], padding='same', use_bias=False))
+                Conv2D(conv_shapes[i][0], conv_shapes[i][1], padding='same', use_bias=True))
         model.add(BatchNormalization())
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2), padding='same'))

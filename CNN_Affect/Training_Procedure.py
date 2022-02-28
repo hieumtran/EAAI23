@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 # from PIL import Image
 from keras.layers import Activation, BatchNormalization, Conv2D, Dense, Dropout, Flatten, GaussianDropout, GlobalAveragePooling2D, MaxPooling2D
 from keras.models import Sequential, load_model
-# from tensorflow.keras.utils import image_dataset_from_directory
 import tensorflow as tf
 # import autokeras as ak
 import timeit
@@ -36,8 +35,8 @@ class Training_Procedure:
     #     return np.asarray(images)
 
     # function to normalize the image data from [0, 255] to [0, 1]
-    def data_normalize(self, image):
-        return image.as_numpy() / 255.
+    # def data_normalize(self, image):
+    #     return image.as_numpy() / 255.0
 
     # have yet known how to load data for regression
     #   since the label values must be type integers
@@ -53,7 +52,7 @@ class Training_Procedure:
             # Set seed to ensure the same split when loading testing data.
             seed=123,
             image_size=(self.image_size, self.image_size),
-            batch_size=self.batch_size,
+            batch_size=self.batch_size
         )
         return train_data
 
@@ -65,30 +64,30 @@ class Training_Procedure:
             # Set seed to ensure the same split when loading testing data.
             seed=123,
             image_size=(self.image_size, self.image_size),
-            batch_size=self.batch_size,
+            batch_size=self.batch_size
         )
         return test_data
 
     # Training function
-    def training(self, train_data, val_data) :
-        # Training process
-        startTime = timeit.default_timer()
-        hist = self.model.fit(train_data,
-                              validation_data=val_data,
-                              epochs=self.epochs,
-                              batch_size=self.batch_size, verbose=1)
-        print('Training time:', timeit.default_timer() - startTime)
+    # def training(self, train_data, val_data) :
+    #     # Training process
+    #     startTime = timeit.default_timer()
+    #     hist = self.model.fit(train_data,
+    #                           validation_data=val_data,
+    #                           epochs=self.epochs,
+    #                           batch_size=self.batch_size, verbose=1)
+    #     print('Training time:', timeit.default_timer() - startTime)
         
-        return hist
+    #     return hist
 
     # Testing function
-    def testing(self, test_data) :
-        # Testing
-        startTime = timeit.default_timer()
-        testLoss, testAccuracy = self.model.evaluate(test_data)
-        print('Testing time:', timeit.default_timer() - startTime)
+    # def testing(self, test_data) :
+    #     # Testing
+    #     startTime = timeit.default_timer()
+    #     testLoss, testAccuracy = self.model.evaluate(test_data)
+    #     print('Testing time:', timeit.default_timer() - startTime)
 
-        return testLoss, testAccuracy
+    #     return testLoss, testAccuracy
 
     def process_classification(self):
 
@@ -103,10 +102,21 @@ class Training_Procedure:
         test_data = self.load_test_data()
 
         # Training
-        hist = self.training(train_data=train_data, val_data=val_data)
-        
+        # hist = self.training(train_data=train_data, val_data=val_data)
+        startTime = timeit.default_timer()
+        hist = self.model.fit(train_data,
+                              validation_data=val_data,
+                              epochs=self.epochs,
+                              batch_size=self.batch_size, verbose=1)
+        print('Training time:', timeit.default_timer() - startTime)
+
+
         # Testing
-        testLoss, testAccuracy = self.testing(test_data=test_data)
+        # testLoss, testAccuracy = self.testing(test_data=test_data)
+        startTime = timeit.default_timer()
+        testLoss, testAccuracy = self.model.evaluate(test_data)
+        print('Testing time:', timeit.default_timer() - startTime)
+
 
         return hist.history, testLoss, testAccuracy, self.model.count_params()
 

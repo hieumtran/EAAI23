@@ -55,7 +55,7 @@ class Training_Procedure:
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size,
         )
-        return train_data.apply(self.data_normalize)
+        return train_data
 
     def load_test_data(self):
         test_data = tf.keras.preprocessing.image_dataset_from_directory(

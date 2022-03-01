@@ -6,6 +6,7 @@ from alexnet_var_model import *
 
 path = "C:/Users/DePauw/AppData/Local/RenderCard/"
 
+
 def viz_res(trainLoss, trainAcc, valLoss, valAcc, savename=None):
     plt.figure(figsize=(15, 7))
 
@@ -34,7 +35,8 @@ def viz_res(trainLoss, trainAcc, valLoss, valAcc, savename=None):
 
 def main():
     # model = alexnet_var_model()
-    model = tf.keras.models.load_model(path + "EAAI23/AlexNet_Variant_20220226_27")
+    model = tf.keras.models.load_model(
+        path + "EAAI23/AlexNet_Variant_20220226_27")
     train_input_path = path + "EAAI23/data/train_set/New Folder"
     train_output = np.load(path + "EAAI23/data/trainval_class.npy")
 
@@ -42,7 +44,7 @@ def main():
     test_output = np.load(
         path + "EAAI23/data/test_class_sorted.npy")
     batch_size = 256
-    epochs = 50
+    epochs = 150
 
     training_procedure = Training_Procedure(
         model,
@@ -64,7 +66,8 @@ def main():
     val_loss = hist['val_loss']
     val_acc = hist['val_accuracy']
 
-    print("Test loss: {:5.2f}, Test accuracy: {:5.2f}".format(testLoss, testAccuracy))
+    print("Test loss: {:5.2f}, Test accuracy: {:5.2f}".format(
+        testLoss, testAccuracy))
     print("total parameter count: ", params_cnt)
 
     viz_res(train_loss, train_acc, val_loss, val_acc, 'alexnet_var_20220228_2')
@@ -78,4 +81,3 @@ with tf.device('/gpu:0'):
 
 # print(len(tf.config.list_physical_devices('GPU')))
 # print(tf.test.is_gpu_available(cuda_only=True))
-

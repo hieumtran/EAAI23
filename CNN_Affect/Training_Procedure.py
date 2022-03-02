@@ -34,7 +34,8 @@ class Training_Procedure:
             subset=sub_set,
             seed=123,
             image_size=(self.image_size, self.image_size),
-            batch_size=self.batch_size
+            batch_size=self.batch_size,
+            shuffle=False
         )
         return train_data.map(lambda x, y: (x/255., y))
 
@@ -46,7 +47,8 @@ class Training_Procedure:
             color_mode='rgb',
             seed=123,
             image_size=(self.image_size, self.image_size),
-            batch_size=self.batch_size
+            batch_size=self.batch_size,
+            shuffle=False
         )
         return test_data.map(lambda x, y: (x/255., y))
 
@@ -59,6 +61,7 @@ class Training_Procedure:
         hist = self.model.fit(train_data,
                               validation_data=val_data,
                               epochs=self.epochs,
+                              shuffle=True,
                               batch_size=self.batch_size, verbose=1)
         print('Training time:', timeit.default_timer() - startTime)
 

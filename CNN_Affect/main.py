@@ -29,36 +29,25 @@ def viz_res(trainLoss, trainAcc, valLoss, valAcc, savename=None):
     plt.tight_layout()
     if savename != None:
         plt.savefig(
-            path+'AlexNet_Variant_20220301/' + savename + '.jpg', dpi=500)
+            path+'AlexNet_Variant_20220306/' + savename + '.jpg', dpi=500)
     plt.show()
 
 
 def main():
-    # model = alexnet_var_model()
-<<<<<<< HEAD
-    model = tf.keras.models.load_model(
-        path + "EAAI23/AlexNet_Variant_20220226_27")
-    train_input_path = path + "EAAI23/data/train_set/New Folder"
-    train_output = np.load(path + "EAAI23/data/trainval_class.npy")
-=======
-    model = tf.keras.models.load_model(path + "AlexNet_Variant_20220226")
+    model = alexnet_var_model()
+    # model = tf.keras.models.load_model(path + "AlexNet_Variant_20220226")
     train_input_path = path + "data/train_set/New Folder"
-    train_output = np.load(path + "data/trainval_class.npy")
->>>>>>> 3b1b431870db0e95bd60bfcf42a8d7c01b180305
+    train_output = np.load(path + "data/archive/trainval_class.npy")
 
     test_input_path = path + "data/val_set/New Folder"
     test_output = np.load(
-        path + "data/test_class_sorted.npy")
+        path + "data/archive/test_class_sorted.npy")
     batch_size = 256
-<<<<<<< HEAD
-    epochs = 150
-=======
     epochs = 100
->>>>>>> 3b1b431870db0e95bd60bfcf42a8d7c01b180305
 
     training_procedure = Training_Procedure(
         model,
-        image_size=128,
+        image_size=224,
         train_input_path=train_input_path,
         train_output=train_output,
         test_input_path=test_input_path,
@@ -69,7 +58,7 @@ def main():
     )
 
     hist, testLoss, testAccuracy, params_cnt = training_procedure.process()
-    model.save('AlexNet_Variant_20220301')
+    model.save('AlexNet_Variant_20220306')
 
     train_loss = hist['loss']
     train_acc = hist['accuracy']
@@ -80,7 +69,7 @@ def main():
         testLoss, testAccuracy))
     print("total parameter count: ", params_cnt)
 
-    viz_res(train_loss, train_acc, val_loss, val_acc, 'alexnet_var_202200301')
+    viz_res(train_loss, train_acc, val_loss, val_acc, 'alexnet_var_202200306')
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"

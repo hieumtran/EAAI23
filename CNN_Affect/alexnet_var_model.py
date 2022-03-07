@@ -6,7 +6,7 @@ from keras.layers import Activation, BatchNormalization, Conv2D, Dense, Dropout,
 # arguments:
 #   image_size: assuming all the input photo has size m*m. The default of this dataset is 128
 #   R_or_C: regression (0) or classification (1). We are more interested in regression so the default is set to 0
-def alexnet_var_model(image_size=128,
+def alexnet_var_model(image_size=224,
                       regression=True,
                       conv_shapes=[[16, (9, 9)], [32, (7, 7)], [64, (5, 5)], [
                           128, (3, 3)], [128, (3, 3)]],

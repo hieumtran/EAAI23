@@ -20,3 +20,6 @@ bin-release/
 # Ignore dataset
 train_set
 val_set
+
+# Ignore PyTorch save file
+./PyTorch/vgg_simple_checkpoint/*.pt

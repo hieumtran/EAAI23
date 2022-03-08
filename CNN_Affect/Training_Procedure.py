@@ -1,5 +1,13 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+from keras.layers import Activation, BatchNormalization, Conv2D, Dense, Dropout, Flatten, GaussianDropout, GlobalAveragePooling2D, MaxPooling2D
+from keras.models import Sequential, load_model
+# from tensorflow.keras.utils import image_dataset_from_directory
 import tensorflow as tf
+# import autokeras as ak
 import timeit
+import gc
 
 
 class Training_Procedure:
@@ -20,6 +28,17 @@ class Training_Procedure:
 
         self.regression = regression
 
+    # def load_image(path, num_arr) :
+    #     images = []
+    #     for num in num_arr :
+    #         images.append(np.asarray(Image(path + "/" + num + ".jpg")))
+
+    #     return np.asarray(images)
+
+    # function to normalize the image data from [0, 255] to [0, 1]
+    def data_normalize(self, image):
+        return image.as_numpy() / 255.
+
     # have yet known how to load data for regression
     #   since the label values must be type integers
 
@@ -27,70 +46,56 @@ class Training_Procedure:
         train_data = tf.keras.preprocessing.image_dataset_from_directory(
             self.train_input_path,
             labels=list(self.train_output.astype(int)),
-            label_mode='categorical',
             color_mode='rgb',
             # Use 20% data as testing data.
             validation_split=val_split,
             subset=sub_set,
+            # Set seed to ensure the same split when loading testing data.
             seed=123,
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size,
-            shuffle=False
         )
-        return train_data.map(lambda x, y: (x/255., y))
+        return train_data
 
     def load_test_data(self):
         test_data = tf.keras.preprocessing.image_dataset_from_directory(
             self.test_input_path,
             labels=list(self.test_output.astype(int)),
-            label_mode='categorical',
             color_mode='rgb',
+            # Set seed to ensure the same split when loading testing data.
             seed=123,
             image_size=(self.image_size, self.image_size),
             batch_size=self.batch_size,
-            shuffle=False
         )
-        return test_data.map(lambda x, y: (x/255., y))
+        return test_data
 
-    # Training function
-    def training(self):
+    def process_classification(self):
+
         train_data = self.load_train_data()
+
+        print(train_data.element_spec)
+        for i in train_data:
+            print(i)
+            break
+
         val_data = self.load_train_data(sub_set="validation")
+        test_data = self.load_test_data()
+
         # Training process
         startTime = timeit.default_timer()
         hist = self.model.fit(train_data,
                               validation_data=val_data,
                               epochs=self.epochs,
-                              shuffle=True,
                               batch_size=self.batch_size, verbose=1)
         print('Training time:', timeit.default_timer() - startTime)
 
-        return hist
-
-    # Testing function
-    def testing(self):
         # Testing
-        test_data = self.load_test_data()
         startTime = timeit.default_timer()
-        testLoss, testAccuracy = self.model.evaluate(test_data)
+        accuracy = self.model.evaluate(test_data)
         print('Testing time:', timeit.default_timer() - startTime)
 
-        return testLoss, testAccuracy
-
-    def process_classification(self):
-
-        # Training
-        hist = self.training()
-
-        # Testing
-        testLoss, testAccuracy = self.testing()
-
-        return hist.history, testLoss, testAccuracy, self.model.count_params()
-
-    def process_regression(self):
-        pass
+        return hist.history, accuracy, self.model.count_params()
 
     def process(self):
         if (not self.regression):
             return self.process_classification()
-        return self.process_regression()

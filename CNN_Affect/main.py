@@ -1,10 +1,7 @@
-import numpy as np
 import os
 import matplotlib.pyplot as plt
 from Training_Procedure import *
 from alexnet_var_model import *
-
-path = "C:/Users/DePauw/AppData/Local/RenderCard/EAAI23/"
 
 
 def viz_res(trainLoss, trainAcc, valLoss, valAcc, savename=None):
@@ -29,25 +26,24 @@ def viz_res(trainLoss, trainAcc, valLoss, valAcc, savename=None):
     plt.tight_layout()
     if savename != None:
         plt.savefig(
-            path+'AlexNet_Variant_20220306/' + savename + '.jpg', dpi=500)
+            'C:/Phanh/BuAnhNet/EAAI23/AlexNet_Variant_20220227/' + savename + '.jpg', dpi=500)
     plt.show()
 
 
 def main():
     model = alexnet_var_model()
-    # model = tf.keras.models.load_model(path + "AlexNet_Variant_20220226")
-    train_input_path = path + "data/train_set/New Folder"
-    train_output = np.load(path + "data/archive/trainval_class.npy")
+    train_input_path = "C:/Phanh/BuAnhNet/EAAI23/data/train_set/New Folder"
+    train_output = np.load("C:/Phanh/BuAnhNet/EAAI23/data/trainval_class.npy")
 
-    test_input_path = path + "data/val_set/New Folder"
+    test_input_path = "C:/Phanh/BuAnhNet/EAAI23/data/val_set/New Folder"
     test_output = np.load(
-        path + "data/archive/test_class_sorted.npy")
+        "C:/Phanh/BuAnhNet/EAAI23/data/test_class_sorted.npy")
     batch_size = 256
-    epochs = 100
+    epochs = 24
 
     training_procedure = Training_Procedure(
         model,
-        image_size=224,
+        image_size=128,
         train_input_path=train_input_path,
         train_output=train_output,
         test_input_path=test_input_path,
@@ -57,26 +53,24 @@ def main():
         regression=False
     )
 
-    hist, testLoss, testAccuracy, params_cnt = training_procedure.process()
-    model.save('AlexNet_Variant_20220306')
+    model.save('AlexNet_Variant_20220227')
+    hist, test_accuracy, params_cnt = training_procedure.process()
 
     train_loss = hist['loss']
     train_acc = hist['accuracy']
     val_loss = hist['val_loss']
     val_acc = hist['val_accuracy']
 
-    print("Test loss: {:5.2f}, Test accuracy: {:5.2f}".format(
-        testLoss, testAccuracy))
+    print("Test accuracy: ", test_accuracy)
     print("total parameter count: ", params_cnt)
 
-    viz_res(train_loss, train_acc, val_loss, val_acc, 'alexnet_var_202200306')
+    viz_res(train_loss, train_acc, val_loss, val_acc, 'alexnet_var_20220227')
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 with tf.device('/gpu:0'):
     main()
 
 # print(tf.__version__)
 
-# print(len(tf.config.list_physical_devices('GPU')))
-# print(tf.test.is_gpu_available(cuda_only=True))
+# print(tf.config.list_physical_devices('GPU'))

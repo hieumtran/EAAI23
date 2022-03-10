@@ -33,3 +33,6 @@ nohup.out
 # Ignore pycache
 PyTorch_reg/design/__pycache__/
 PyTorch_reg/__pycache__/
+
+# Ignore change within pycache
+PyTorch_reg/__pycache__/*.pyc

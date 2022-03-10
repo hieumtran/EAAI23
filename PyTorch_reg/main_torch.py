@@ -24,18 +24,18 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
     
-    fit(train_data=(train_paths, train_labels), 
-        val_data=(val_paths, val_labels), 
-        model=model,
-        optimizer=optimizer, loss_func=loss_func, 
-        epochs=epochs, batch_size=batch_size,
-        save_path=save_path, device=device)
+    # fit(train_data=(train_paths, train_labels), 
+    #     val_data=(val_paths, val_labels), 
+    #     model=model,
+    #     optimizer=optimizer, loss_func=loss_func, 
+    #     epochs=epochs, batch_size=batch_size,
+    #     save_path=save_path, device=device)
 
-    # test_model(test_data=(test_paths, test_labels), 
-    #             model=model,
-    #             optimizer=optimizer, loss_func=loss_func, 
-    #             batch_size=batch_size,
-    #             load_path=save_path + '24.pt', device=device)
+    test_model(test_data=(test_paths, test_labels),  aspect = ['train_loss', 'val_loss'],
+                model=model,
+                optimizer=optimizer, loss_func=loss_func, 
+                batch_size=batch_size,
+                load_path=save_path + '24.pt', device=device)
     
 
 

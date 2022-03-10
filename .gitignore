@@ -23,10 +23,17 @@ val_set
 ./data/archive/*
 
 # Ignore PyTorch save file
-./PyTorch/vgg_simple_checkpoint/*.pt
+PyTorch_reg/design/vgg_simple_checkpoint/
+PyTorch_reg/design/spatial_transformer/
+PyTorch_reg/design/resnet/
 
-# Ignore Failed Training Result Folders
-.archive/AlexNet_Variant_20220226/*
-.archive/AlexNet_Variant_20220226_27/*
-.archive/AlexNet_Variant_20220228/*
-.archive/AlexNet_Variant_20220306/*
+# Ignore outputs
+*.txt
+nohup.out
+
+# Ignore pycache
+PyTorch_reg/design/__pycache__/
+PyTorch_reg/__pycache__/
+
+# Ignore change within pycache
+PyTorch_reg/__pycache__/*.pyc

@@ -24,8 +24,8 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
     
-    fit(train_data=(train_paths[:1000], train_labels[:1000]), 
-        val_data=(val_paths[:1000], val_labels[:1000]), 
+    fit(train_data=(train_paths, train_labels), 
+        val_data=(val_paths, val_labels), 
         model=model,
         optimizer=optimizer, loss_func=loss_func, 
         epochs=epochs, batch_size=batch_size,

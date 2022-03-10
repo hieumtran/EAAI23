@@ -22,4 +22,9 @@ train_set
 val_set
 
 # Ignore PyTorch save file
-./PyTorch/vgg_simple_checkpoint/*.pt
+PyTorch_reg/vgg_simple_checkpoint
+PyTorch_reg/spatial_transformer
+
+# Ignore outputs
+*.txt
+nohup.out

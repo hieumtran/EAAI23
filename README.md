@@ -7,9 +7,7 @@ suggestions. Various convolutional neural network (CNN) architectures will be ap
 the user’s Spotify history, applying deep learning to categorize songs based on lyrics and audio,
 combined with attributes already assigned by Spotify. The system will then recommend songs
 matching the user’s mood. A paper on this work will be submitted to the Educational Advances
-in Artificial Intelligence (EAAI) symposium for peer review, with accepted papers published in
-the international Association for the Advancement of Artificial Intelligence (AAAI) 2023 con-
-ference proceedings.
+in Artificial Intelligence (EAAI) symposium for peer review, with accepted papers published in the international Association for the Advancement of Artificial Intelligence (AAAI) 2023 conference proceedings.
 
 ## Requirements
 * Python >= 3.8 (3.9 recommended)

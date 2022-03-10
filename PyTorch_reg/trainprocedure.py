@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import timeit
 import matplotlib.pyplot as plt
+import datetime 
 
 def batch(inputs, outputs, size):
     # loop over the dataset
@@ -11,28 +12,27 @@ def batch(inputs, outputs, size):
         input_imgs = []
         for item in inputs[i:i+size]:
             # Convert to image with normalization
-            input_imgs.append(np.asarray(Image.open(item).resize((128,128),Image.ANTIALIAS)) / 255) 
+            input_imgs.append(np.asarray(Image.open(item)) / 255) 
         yield (np.stack(input_imgs, axis=0), outputs[i:i + size])
 
 def eval(input, output, 
          optimizer, loss_func, 
          model, training):
-    input = torch.reshape(input, (-1, 3, 128, 128))
+    input = torch.reshape(input, (-1, 3, 224, 224))
     predict = model(input.float())
-    loss = torch.sqrt(loss_func(predict.float(), output.float()))
-    # print(loss)
+    loss = loss_func(predict.float(), output.float(), output.size(0))
     if training: 
         optimizer.zero_grad()
-        loss.requres_grad = True
         loss.backward()
         optimizer.step()
-    return loss.item()
+    return loss.item() * (2*output.size(0))
 
 def fit(train_data, val_data, 
         model,
         optimizer, loss_func, 
         epochs, batch_size,
         save_path, device):
+
     # Train and Val data
     x_train, y_train = train_data
     x_val, y_val = val_data
@@ -43,31 +43,39 @@ def fit(train_data, val_data,
 
     for epoch in range(1, epochs+1):
         model.train()
-        samples = 0
-        train_avg_loss = 0
-        val_avg_loss = 0
-
-        # Training 
+        train_samples = 0
+        val_samples = 0
+        batch_train = 0
+        batch_val = 0
+        avg_train_loss = 0
+        avg_val_loss = 0
+        
+        # Training
+        # Output Template
+        train_templ = 'Training mini-batch {}: {:.10f} / Time: {:.5f}s / Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         for (batchX, batchY) in batch(x_train, y_train, batch_size):
             start = timeit.default_timer()
             (batchX, batchY) = (torch.from_numpy(batchX).to(device), torch.from_numpy(batchY).to(device))
             loss = eval(input=batchX, output=batchY, optimizer=optimizer, loss_func=loss_func, model=model, training=True)
-            train_avg_loss += loss
-            samples += 1
-            print('Mini-batch {}: {} - {}s'.format(samples, loss, timeit.default_timer()-start))
-        train_avg_loss = train_avg_loss / samples # Average loss across mini-batch
-        train_loss.append(train_avg_loss)
-
+            avg_train_loss += loss
+            train_samples += batchY.size(0)
+            batch_train += 1
+            print(train_templ.format(batch_train, loss/(batchY.size(0)*2), timeit.default_timer()-start, datetime.datetime.now()))
+        train_loss.append(loss/(batchY.size(0)*2))
         
         # Evaluation
-        samples = 0
+        # Output Template
+        val_templ = 'Validation mini-batch {}: {:.10f} / Time: {:.5f}s / Current date & Time: {:%Y-%m-%d %H:%M:%S}' 
         model.eval() # Canceling regularization
         for (batchX, batchY) in batch(x_val, y_val, batch_size):
+            start = timeit.default_timer()
             (batchX, batchY) = (torch.from_numpy(batchX).to(device), torch.from_numpy(batchY).to(device))
-            val_avg_loss += eval(input=batchX, output=batchY, optimizer=optimizer, loss_func=loss_func, model=model, training=False)
-            samples += 1
-        val_avg_loss = val_avg_loss / samples # Average loss across mini-batch
-        val_loss.append(val_avg_loss)
+            loss = eval(input=batchX, output=batchY, optimizer=optimizer, loss_func=loss_func, model=model, training=False)
+            avg_val_loss += loss
+            val_samples += batchY.size(0)
+            batch_val += 1
+            print(val_templ.format(batch_val, loss/(batchY.size(0)*2), timeit.default_timer()-start, datetime.datetime.now()))
+        val_loss.append(loss/(batchY.size(0)*2))
         
         torch.save({
                     'epoch': epoch,
@@ -78,10 +86,10 @@ def fit(train_data, val_data,
                     }, save_path+str(epoch)+'.pt')
 
         # display model progress on the current training batch
-        template = "epoch: {} train loss: {} val loss: {}"
-        print(template.format(epoch, train_avg_loss, val_avg_loss))
+        template = 'Epoch {} / train: {:.10f} / val: {:.10f}  / Time: {:.5f}s / Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+        print(template.format(epoch, avg_train_loss/(train_samples*2), avg_val_loss/(val_samples*2), timeit.default_timer()-start, datetime.datetime.now()))
 
-def test_model(test_data, 
+def test_model(test_data, aspect, 
                 model,
                 optimizer, loss_func, 
                 batch_size,
@@ -89,23 +97,30 @@ def test_model(test_data,
     x_test, y_test = test_data
     
     ckpt = torch.load(load_path)
-    plt.plot(ckpt['train_loss'])
-    plt.plot(ckpt['val_loss'])
+    plt.plot(ckpt[aspect[0]])
+    plt.plot(ckpt[aspect[1]])
     plt.grid()
-    plt.show()
+    plt.savefig('./sp_trans.jpg')
+    # plt.show()
 
     model.load_state_dict(ckpt['model_state_dict'])
     optimizer.load_state_dict(ckpt['optimizer_state_dict'])
 
-    test_avg_loss = 0
-    samples = 0
+    avg_test_total_loss = 0
+    avg_test_val_loss = 0
+    avg_test_ars_loss = 0
+    test_samples = 0
     model.eval() # Canceling regularization
     for (batchX, batchY) in batch(x_test, y_test, batch_size):
         (batchX, batchY) = (torch.from_numpy(batchX).to(device), torch.from_numpy(batchY).to(device))
-        test_avg_loss += eval(input=batchX, output=batchY, optimizer=optimizer, loss_func=loss_func, model=model, training=False)
-        samples += 1
-    test_avg_loss = test_avg_loss / samples # Average loss across mini-batch
-    print('Test loss: ', test_avg_loss)
+        loss, val_loss, ars_loss = eval(input=batchX, output=batchY, optimizer=optimizer, loss_func=loss_func, model=model, training=False)
+        avg_test_total_loss += loss
+        avg_test_val_loss += val_loss
+        avg_test_ars_loss += ars_loss
+        print(batchY.size())
+        test_samples += batchY.size(0)
+    template = 'Test loss: {} / val_loss: {} / ars_loss: {} '
+    print(template.format(np.sqrt(avg_test_total_loss/ test_samples), np.sqrt(avg_test_val_loss/ test_samples), np.sqrt(avg_test_ars_loss/ test_samples))) 
 
 
     

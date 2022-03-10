@@ -37,3 +37,10 @@ PyTorch_reg/__pycache__/
 
 # Ignore change within pycache
 PyTorch_reg/__pycache__/*.pyc
+
+# Ignore AlexNet saved folders
+./archive/AlexNet_Variant_20220226/
+./archive/AlexNet_Variant_20220226_27/
+./archive/AlexNet_Variant_20220227/
+./archive/AlexNet_Variant_20220228/
+./archive/AlexNet_Variant_20220306/

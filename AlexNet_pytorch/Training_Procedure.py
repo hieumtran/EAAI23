@@ -8,7 +8,7 @@ class Training_Procedure:
     def __init__(
         self, model,
         train_dataloader, val_dataloader, test_dataloader,
-        batch_size, epochs, optimizer, loss_func,
+        batch_size, epochs, optimizer, loss_func, regression=False,
         shuffle=False, num_workers=0, lr=0.001, savename=None
     ):
         self.device = torch.device(
@@ -24,6 +24,7 @@ class Training_Procedure:
         self.epochs = epochs
         self.optimizer = optimizer
         self.loss_func = loss_func
+        self.regression = regression
         self.lr = lr
         self.savename = savename
 
@@ -34,6 +35,7 @@ class Training_Procedure:
 
         # training
         train_output = self.model(x_train)
+        print(train_output.shape, y_train.shape)
 
         # calculating loss
         train_loss = self.loss_func(train_output, y_train)
@@ -91,6 +93,8 @@ class Training_Procedure:
             # training by batches
             for (batchX, batchY) in self.train_batchIter:
                 batchX = batchX.to(self.device)
+                if (not self.regression):
+                    batchY = batchY.type(torch.LongTensor)
                 batchY = batchY.to(self.device)
                 train_y_predicted, loss = self.train(batchX, batchY)
                 trainLoss += loss

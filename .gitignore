@@ -20,6 +20,13 @@ bin-release/
 # Ignore dataset
 train_set
 val_set
+./data/archive/*
 
 # Ignore PyTorch save file
 ./PyTorch/vgg_simple_checkpoint/*.pt
+
+# Ignore Failed Training Result Folders
+.archive/AlexNet_Variant_20220226/*
+.archive/AlexNet_Variant_20220226_27/*
+.archive/AlexNet_Variant_20220228/*
+.archive/AlexNet_Variant_20220306/*

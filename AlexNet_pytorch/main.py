@@ -55,17 +55,17 @@ def main():
     model = AlexNet_Class()
     train_classLoader = Dataloader(root, train_image_dir, train_class_frame).load_batch(
         batch_size, shuffle, num_workers)
-    train_regLoader = Dataloader(root, train_image_dir, train_reg_frame).load_batch(
+    train_regLoader = Dataloader(root, train_image_dir, train_reg_frame, regression=True).load_batch(
         batch_size, shuffle, num_workers)
 
     val_classLoader = Dataloader(root, val_image_dir, val_class_frame).load_batch(
         batch_size, shuffle, num_workers)
-    val_regLoader = Dataloader(root, val_image_dir, val_reg_frame).load_batch(
+    val_regLoader = Dataloader(root, val_image_dir, val_reg_frame, regression=True).load_batch(
         batch_size, shuffle, num_workers)
 
     test_classLoader = Dataloader(root, test_image_dir, test_class_frame).load_batch(
         batch_size, shuffle, num_workers)
-    test_regLoader = Dataloader(root, test_image_dir, test_reg_frame).load_batch(
+    test_regLoader = Dataloader(root, test_image_dir, test_reg_frame, regression=True).load_batch(
         batch_size, shuffle, num_workers)
 
     lr = 0.001
@@ -89,3 +89,4 @@ def main():
 
 
 main()
+# print(torch.cuda.is_available())

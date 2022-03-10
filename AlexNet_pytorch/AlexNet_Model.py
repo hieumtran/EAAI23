@@ -14,39 +14,39 @@ class AlexNet_Reg(nn.Module):
 
         super(AlexNet_Reg, self).__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(3, 16, 9, 1),
+            nn.Conv2d(3, 16, 9),
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(3, 32, 7, 1),
+            nn.Conv2d(16, 32, 7),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(3, 64, 5, 1),
+            nn.Conv2d(32, 64, 5),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(3, 128, 3, 1),
+            nn.Conv2d(64, 128, 3),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(3, 128, 3, 1),
-            nn.BatchNorm2d(16),
+            nn.Conv2d(128, 128, 3),
+            nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
             nn.Flatten(),
 
-            nn.Linear(1024, 1024),
+            nn.Linear(128, 1024),
             nn.BatchNorm2d(1024),
             nn.ReLU(inplace=True),
             nn.Dropout2d(0.5, inplace=True),
@@ -79,55 +79,58 @@ class AlexNet_Class(nn.Module):
 
         super(AlexNet_Class, self).__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(3, 16, 9),
+            nn.Conv2d(3, 16, 9, 1),
             nn.BatchNorm2d(16),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(16, 32, 7),
+            nn.Conv2d(16, 32, 7, 1),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(32, 64, 5),  # , 5, 1
+            nn.Conv2d(32, 64, 5, 1),
             nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=False),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(64, 128, 3),  # , 3, 1
+            nn.Conv2d(64, 128, 3, 1),
             nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=False),
             nn.MaxPool2d(2, 2),
             nn.Dropout2d(0.2, inplace=True),
 
-            nn.Conv2d(128, 128, 3),  # , 3, 1
+            nn.Conv2d(128, 128, 3, 1),
             nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=False),
             nn.MaxPool2d(2, 2),
-            nn.Dropout2d(0.2, inplace=True),
+            nn.Dropout2d(0.2, inplace=True)
+        )
 
-            nn.Flatten(),
-
+        self.linear = nn.Sequential(
             nn.Linear(128, 1024),
-            nn.BatchNorm2d(1024),
-            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(inplace=False),
             nn.Dropout2d(0.5, inplace=True),
 
 
             nn.Linear(1024, 1024),
-            nn.BatchNorm2d(1024),
-            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(inplace=False),
             nn.Dropout2d(0.5, inplace=True),
 
-            nn.Linear(1024, 10)
+            nn.Linear(1024, 10),
+            # nn.Softmax(dim=10)
         )
 
     def forward(self, input):
-        shared_output = self.net(input)
-        return shared_output
+        conv = self.net(input)
+        conv = conv.view(conv.shape[0], -1)
+        output = self.linear(conv)
+        return output
 
     # can I separate the shared_output into 2 samples -> feed 1 through regression
     #   and feed the other one through classification.

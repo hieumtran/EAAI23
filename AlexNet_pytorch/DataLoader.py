@@ -33,10 +33,12 @@ class Dataset(Dataset):
         img_name = os.path.join(self.image_dir,
                                 self.label_frame.iloc[idx, 0])
         images = Image.open(img_name)
-        labels = self.label_frame.iloc[idx, 1:]
-        labels = (np.array([labels])).astype("int")
         if (self.regression):
-            labels = labels.astype('float').reshape(-1, 2)
+            labels = self.label_frame.iloc[idx, 1:]
+            labels = (np.array([labels])).reshape(-1, 2)
+        else:
+            labels = self.label_frame.iloc[idx, 1]
+            labels = (np.array(labels)).astype("int")
 
         if (self.transform):
             images = self.transform(images)

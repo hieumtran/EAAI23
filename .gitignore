@@ -24,7 +24,12 @@ val_set
 # Ignore PyTorch save file
 PyTorch_reg/design/vgg_simple_checkpoint/
 PyTorch_reg/design/spatial_transformer/
+PyTorch_reg/design/resnet/
 
 # Ignore outputs
 *.txt
 nohup.out
+
+# Ignore pycache
+PyTorch_reg/design/__pycache__/
+PyTorch_reg/__pycache__/

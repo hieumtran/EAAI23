@@ -7,26 +7,8 @@ from PIL import Image
 from torchvision import transforms
 
 
-def path_loader(dtype, outtype):
-    assert dtype in ['train', 'test', 'val']
-    assert outtype in ['reg', 'class']
-
-    if dtype in ['train', 'val']:
-        imgs_path = './train_set/images/'
-    elif dtype == 'test':
-        imgs_path = './val_set/images/'
-
-    imgs_labels = np.load('./data/' + dtype + '_path.npy')  # Shuffle imgs
-    out_labels = np.load('./data/' + dtype + '_' + outtype + '.npy')  # labels: class or reg
-
-    # Load images data to numpy array
-    input_paths = [imgs_path + img_label + '.jpg' for img_label in imgs_labels]
-    return input_paths, out_labels.astype(float)
-
-
 # inherit the torch.utils.data.Dataset class
 class Dataset(Dataset):
-
     def __init__(self, image_dir, label_frame, regression=False, transform=None):
         """
         Args:
@@ -62,7 +44,6 @@ class Dataset(Dataset):
 
 
 class Dataloader():
-
     def __init__(
             self,
             root, image_dir, label_frame,

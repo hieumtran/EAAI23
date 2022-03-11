@@ -27,15 +27,15 @@ PyTorch_reg/design/vgg_simple_checkpoint/
 PyTorch_reg/design/spatial_transformer/
 PyTorch_reg/design/resnet/
 
-# Ignore outputs
-*.txt
-
 # pycharm cache
 .idea/
 
 # Ignore pycache
 PyTorch_reg/__pycache__/
 PyTorch_reg/design/__pyache__/
+
+# Ignore log files
+PyTorch_reg/log/*.txt
 
 # Ignore AlexNet saved folders
 ./archive/AlexNet_Variant_20220226/

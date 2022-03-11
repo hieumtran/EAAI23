@@ -56,7 +56,7 @@ class procedure:
                 self.optimizer.step()
             
             # Loss and samples size for evaluation
-            sum_loss += loss
+            sum_loss += loss.item()*(2*output.size(0))
             samples += batchY.size(0) # sample size
             batch_cnt += 1
 
@@ -68,7 +68,7 @@ class procedure:
         input = torch.reshape(input, (-1, 3, 224, 224)) # Reshape to NxCxHxW
         predict = self.model(input.float())
         loss = self.loss_func(predict.float(), output.float(), output.size(0))
-        return loss.item()*(2*output.size(0))
+        return loss
     
     def test(self, test_loader):
         start = timeit.default_timer()

@@ -31,7 +31,7 @@ class procedure:
             self.train_arr.append(train_loss)
             self.val_arr.append(val_loss) 
 
-            self.save(epoch) # Saving model 
+            self.save_model(epoch) # Saving model 
             print(output_template.format(epoch, train_loss, val_loss, timeit.default_timer() - epoch_start, datetime.datetime.now()))
             
     def train_val_test(self, loader, training):
@@ -46,7 +46,7 @@ class procedure:
         samples, batch_cnt, sum_loss = (0, 0, 0)
         for (batchX, batchY) in loader:
             start = timeit.default_timer()
-            (batchX, batchY) = (batchX.to(self.device), batchY.to(self.device)) # Load data
+            (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float()) # Load data
             if training: self.optimizer.zero_grad() # Zero grad before mini-batch
             loss = self.loss_compute(batchX, batchY) # Forward model
 
@@ -61,11 +61,12 @@ class procedure:
             batch_cnt += 1
 
             # Logging
-            print(log_template.format(batch_cnt, loss/(2*batchY.size(0)), timeit.default_timer()-start, datetime.datetime.now()))
+            print(log_template.format(batch_cnt, loss.item(), timeit.default_timer()-start, datetime.datetime.now()))
         return sum_loss/(2*samples)
     
     def loss_compute(self, input, output):
         input = torch.reshape(input, (-1, 3, 224, 224)) # Reshape to NxCxHxW
+        output = torch.reshape(output, (-1, 2))
         predict = self.model(input.float())
         loss = self.loss_func(predict.float(), output.float(), output.size(0))
         return loss

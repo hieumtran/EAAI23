@@ -43,7 +43,7 @@ class procedure:
             log_template = 'Validation mini-batch {}: {:.10f} / Time: {:.5f}s / Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         
         # Init computation variables
-        samples, batch_cnt, sum_loss = 0, 0, 0
+        samples, batch_cnt, sum_loss = (0, 0, 0)
         for (batchX, batchY) in loader:
             start = timeit.default_timer()
             (batchX, batchY) = (batchX.to(self.device), batchY.to(self.device)) # Load data
@@ -56,7 +56,7 @@ class procedure:
                 self.optimizer.step()
             
             # Loss and samples size for evaluation
-            sum_loss += loss.item()*(2*output.size(0))
+            sum_loss += loss.item()*(2*batchY.size(0))
             samples += batchY.size(0) # sample size
             batch_cnt += 1
 

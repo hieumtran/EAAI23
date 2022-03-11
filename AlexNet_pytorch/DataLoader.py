@@ -35,7 +35,7 @@ class Dataset(Dataset):
         images = Image.open(img_name)
         if (self.regression):
             labels = self.label_frame.iloc[idx, 1:]
-            labels = (np.array([labels])).reshape(-1, 2)
+            labels = (np.array([labels])).astype('float').reshape(-1, 2)
         else:
             labels = self.label_frame.iloc[idx, 1]
             labels = (np.array(labels)).astype("int")
@@ -49,16 +49,12 @@ class Dataset(Dataset):
 class Dataloader():
 
     def __init__(
-        self,
-        root, image_dir, label_frame,
+        self, root, image_dir, label_frame,
         transform=transforms.Compose([
-            transforms.Resize(128),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225],
-            )
-        ]),
+                std=[0.229, 0.224, 0.225])]),
         regression=False
     ):
         """

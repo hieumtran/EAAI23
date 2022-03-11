@@ -35,7 +35,6 @@ class Training_Procedure:
 
         # training
         train_output = self.model(x_train)
-        print(train_output.shape, y_train.shape)
 
         # calculating loss
         train_loss = self.loss_func(train_output, y_train)
@@ -149,6 +148,11 @@ class Training_Procedure:
         # display test model
         print('Test loss: {} Test acc: {}'.format(avg_testLoss, avg_testAcc))
 
-        torch.save(self.model.state_dict(), self.savename+".pth")
+        torch.save(
+            {   
+                "optimizer" : self.optimizer.state_dict(),
+                "parameters" : self.model.state_dict()
+            }, 
+            self.savename+".pth")
 
         return trainLoss_glob, trainAcc_glob, valLoss_glob, valAcc_glob

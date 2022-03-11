@@ -7,12 +7,11 @@ import datetime
 
 
 class procedure:
-    def __init__(self, optimizer, loss_func, model, start_epoch, end_epoch, batch_size, device):
+    def __init__(self, optimizer, loss_func, model, start_epoch, end_epoch, device):
         self.optimizer = optimizer  # optimizer
         self.loss_func = loss_func # loss function
         self.model = model  # model init
         self.device = device  # device
-        self.batch_size = batch_size  # mini-batch size
         self.start_epoch = start_epoch # Begining epoch
         self.end_epoch = end_epoch # Ending epoch
         self.train_arr = [] # Init training loss

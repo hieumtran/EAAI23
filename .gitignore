@@ -29,11 +29,6 @@ PyTorch_reg/design/resnet/
 
 # Ignore outputs
 # *.txt
-nohup.out
-
-# Ignore pycache
-PyTorch_reg/design/__pycache__/
-PyTorch_reg/__pycache__/
 
 # Ignore AlexNet saved folders
 ./archive/AlexNet_Variant_20220226/

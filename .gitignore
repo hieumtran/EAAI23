@@ -27,5 +27,12 @@ PyTorch_reg/design/vgg_simple_checkpoint/
 PyTorch_reg/design/spatial_transformer/
 PyTorch_reg/design/resnet/
 
-# Ignore outputs
-*.txt
+# pycharm cache
+.idea/
+
+# Ignore pycache
+__pycache__/
+
+# Ignore log files
+PyTorch_reg/log/*.txt
+

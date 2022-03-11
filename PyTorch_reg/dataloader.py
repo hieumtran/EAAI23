@@ -9,7 +9,7 @@ from torchvision import transforms
 
 # inherit the torch.utils.data.Dataset class
 class Dataset(Dataset):
-    def __init__(self, image_dir, label_frame, regression=False, transform=None):
+    def __init__(self, image_dir, label_frame, subset, regression=False, transform=None):
         """
         Args:
             image_dir (string): Directory with all the images.
@@ -19,6 +19,7 @@ class Dataset(Dataset):
         """
         self.image_dir = image_dir
         self.label_frame = pd.read_csv(label_frame)
+        if subset != None: self.label_frame = self.label_frame[:subset]
         self.regression = regression
         self.transform = transform
 
@@ -33,9 +34,11 @@ class Dataset(Dataset):
                                 self.label_frame.iloc[idx, 0])
         images = Image.open(img_name)
         labels = self.label_frame.iloc[idx, 1:]
-        labels = (np.array([labels])).astype("int")
+
         if self.regression:
-            labels = labels.astype('float').reshape(-1, 2)
+            labels = (np.array([labels])).astype("float")
+        else:
+            labels = (np.array([labels])).astype("int")
 
         if self.transform:
             images = self.transform(images)
@@ -54,7 +57,7 @@ class Dataloader():
                     std=[0.229, 0.224, 0.225],
                 )
             ]),
-            regression=False
+            subset=None, regression=False
     ):
         """
         Args:
@@ -71,6 +74,7 @@ class Dataloader():
         self.label_frame = root + "data/" + label_frame
         self.regression = regression
         self.transform = transform
+        self.subset = subset
 
     def load_batch(self, batch_size, shuffle=False, num_workers=0):
         """
@@ -84,9 +88,8 @@ class Dataloader():
                 will return the corresponding batchX, batchY.
         """
 
-        dataset = Dataset(self.image_dir, self.label_frame,
+        dataset = Dataset(self.image_dir, self.label_frame, self.subset,
                           transform=self.transform, regression=self.regression)
-        batch_iter = DataLoader(
-            dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        batch_iter = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
         return batch_iter

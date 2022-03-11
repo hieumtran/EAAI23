@@ -6,19 +6,23 @@ import os
 from PIL import Image
 from torchvision import transforms
 
+
 def path_loader(dtype, outtype):
     assert dtype in ['train', 'test', 'val']
     assert outtype in ['reg', 'class']
 
-    if dtype in ['train', 'val']: imgs_path = './train_set/images/'
-    elif dtype == 'test': imgs_path = './val_set/images/'
+    if dtype in ['train', 'val']:
+        imgs_path = './train_set/images/'
+    elif dtype == 'test':
+        imgs_path = './val_set/images/'
 
-    imgs_labels = np.load('./data/' + dtype + '_path.npy') # Shuffle imgs
-    out_labels = np.load('./data/' + dtype + '_' + outtype + '.npy') # labels: class or reg
+    imgs_labels = np.load('./data/' + dtype + '_path.npy')  # Shuffle imgs
+    out_labels = np.load('./data/' + dtype + '_' + outtype + '.npy')  # labels: class or reg
 
     # Load images data to numpy array
     input_paths = [imgs_path + img_label + '.jpg' for img_label in imgs_labels]
     return input_paths, out_labels.astype(float)
+
 
 # inherit the torch.utils.data.Dataset class
 class Dataset(Dataset):
@@ -48,10 +52,10 @@ class Dataset(Dataset):
         images = Image.open(img_name)
         labels = self.label_frame.iloc[idx, 1:]
         labels = (np.array([labels])).astype("int")
-        if (self.regression):
+        if self.regression:
             labels = labels.astype('float').reshape(-1, 2)
 
-        if (self.transform):
+        if self.transform:
             images = self.transform(images)
 
         return images, labels
@@ -60,17 +64,17 @@ class Dataset(Dataset):
 class Dataloader():
 
     def __init__(
-        self,
-        root, image_dir, label_frame,
-        transform=transforms.Compose([
-            transforms.Resize(128),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225],
-            )
-        ]),
-        regression=False
+            self,
+            root, image_dir, label_frame,
+            transform=transforms.Compose([
+                transforms.Resize(128),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225],
+                )
+            ]),
+            regression=False
     ):
         """
         Args:

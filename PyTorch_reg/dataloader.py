@@ -48,7 +48,6 @@ class Dataloader():
             self,
             root, image_dir, label_frame,
             transform=transforms.Compose([
-                transforms.Resize(128),
                 transforms.ToTensor(),
                 transforms.Normalize(
                     mean=[0.485, 0.456, 0.406],

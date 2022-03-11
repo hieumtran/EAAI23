@@ -1,6 +1,6 @@
 import numpy as np
-from dataloader import DataLoader, path_loader  # Uncertain on DataLoader - Anh
-from trainprocedure import fit, test_model  # Wrong test_model function
+from dataloader import DataLoader
+from procedure import procedure
 import torch
 import torch.nn as nn
 # from design.vgg_simple import VGG_simple # VGG-16
@@ -9,7 +9,7 @@ from design.resnet import ResNet
 from loss_function import L2_dist
 
 
-def load_data(root, batch_size, num_workers, shuffle)
+def load_data(root, batch_size, num_workers, shuffle):
     # Data loading
     train_image_dir = "data/train_set/images/"
     train_reg_frame = "train_reg.csv"
@@ -40,18 +40,26 @@ def main():
     num_workers = 2
     root_dir = './'
     shuffle = False
-    train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size
+    train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size, /
                                                         num_workers=num_workers, shuffle=shuffle)
     
     # Model parameters
-    epochs = 24
+    start_epoch = 1
+    end_epochs = 24
     loss_func = L2_dist
     save_path = './PyTorch_reg/design/resnet/resnet_'
+    save_fig = './PyTroch_reg/figure/ResNet_loss'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # Init model & Optimizer
-    model = ResNet(256, [64, 256], 1).to(device).float()
+    res_net = ResNet(256, [64, 256], 1).to(device).float()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+
+    # procedure init
+    proced = procedure(optimizer=optimizer, loss_func=loss_func, model=res_net, /
+                        start_epoch=start_epoch, end_epoch=end_epoch, device=device, /
+                        save_path=save_path, save_fig=save_fig)
+    proced.fit(train_loader, val_loader)
 
 if __name__ == '__main__':
     main()

@@ -7,7 +7,7 @@ import datetime
 
 
 class procedure:
-    def __init__(self, optimizer, loss_func, model, start_epoch, end_epoch, / 
+    def __init__(self, optimizer, loss_func, model, start_epoch, end_epoch, \
                 save_path, save_fig, device):
         self.optimizer = optimizer  # optimizer
         self.loss_func = loss_func # loss function

@@ -35,9 +35,6 @@ nohup.out
 PyTorch_reg/design/__pycache__/
 PyTorch_reg/__pycache__/
 
-# Ignore change within pycache
-PyTorch_reg/__pycache__/
-
 # Ignore AlexNet saved folders
 ./archive/AlexNet_Variant_20220226/
 ./archive/AlexNet_Variant_20220226_27/

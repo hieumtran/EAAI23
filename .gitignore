@@ -30,6 +30,9 @@ PyTorch_reg/design/resnet/
 # Ignore outputs
 # *.txt
 
+# pycharm cache
+.idea/
+
 # Ignore AlexNet saved folders
 ./archive/AlexNet_Variant_20220226/
 ./archive/AlexNet_Variant_20220226_27/

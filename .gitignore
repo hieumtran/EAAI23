@@ -31,8 +31,8 @@ PyTorch_reg/design/resnet/
 .idea/
 
 # Ignore pycache
-PyTorch_reg/__pycache__/
-PyTorch_reg/design/__pyache__/
+./PyTorch_reg/__pycache__/
+./PyTorch_reg/design/__pyache__/
 
 # Ignore log files
 PyTorch_reg/log/*.txt

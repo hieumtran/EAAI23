@@ -9,7 +9,6 @@ from torchvision import transforms
 
 # inherit the torch.utils.data.Dataset class
 class Dataset(Dataset):
-
     def __init__(self, image_dir, label_frame, regression=False, transform=None):
         """
         Args:
@@ -45,7 +44,6 @@ class Dataset(Dataset):
 
 
 class Dataloader():
-
     def __init__(
             self,
             root, image_dir, label_frame,

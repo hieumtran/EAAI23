@@ -9,7 +9,7 @@ from design.resnet import ResNet
 from loss_function import L2_dist
 
 
-def load_data(root, batch_size, num_workers, shuffle)
+def load_data(root, batch_size, num_workers, shuffle):
     # Data loading
     train_image_dir = "data/train_set/images/"
     train_reg_frame = "train_reg.csv"

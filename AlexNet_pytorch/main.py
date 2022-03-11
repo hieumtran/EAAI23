@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from AlexNet_Model import AlexNet_Reg, AlexNet_Class
 from Training_Procedure import Training_Procedure
 from DataLoader import Dataloader
+from datetime import datetime
 
 
 def viz_res(root, dest_folder, trainLoss, trainAcc, valLoss, valAcc, savename=None):
@@ -33,12 +34,13 @@ def viz_res(root, dest_folder, trainLoss, trainAcc, valLoss, valAcc, savename=No
 
 def main():
 
-    root = "C:/Phanh/BuAnhNet/EAAI23/"
-    result = "AlexNet_torch_20220307"
+    root = "../"
+    result = "AlexNet_torch_20220310"
 
     batch_size = 32
     shuffle = True
     num_workers = 0
+    regression = False
 
     train_image_dir = "data/train_set/images/"
     train_reg_frame = "train_reg.csv"
@@ -55,24 +57,24 @@ def main():
     model = AlexNet_Class()
     train_classLoader = Dataloader(root, train_image_dir, train_class_frame).load_batch(
         batch_size, shuffle, num_workers)
-    train_regLoader = Dataloader(root, train_image_dir, train_reg_frame, regression=True).load_batch(
+    train_regLoader = Dataloader(root, train_image_dir, train_reg_frame, regression=regression).load_batch(
         batch_size, shuffle, num_workers)
 
     val_classLoader = Dataloader(root, val_image_dir, val_class_frame).load_batch(
         batch_size, shuffle, num_workers)
-    val_regLoader = Dataloader(root, val_image_dir, val_reg_frame, regression=True).load_batch(
+    val_regLoader = Dataloader(root, val_image_dir, val_reg_frame, regression=regression).load_batch(
         batch_size, shuffle, num_workers)
 
     test_classLoader = Dataloader(root, test_image_dir, test_class_frame).load_batch(
         batch_size, shuffle, num_workers)
-    test_regLoader = Dataloader(root, test_image_dir, test_reg_frame, regression=True).load_batch(
+    test_regLoader = Dataloader(root, test_image_dir, test_reg_frame, regression=regression).load_batch(
         batch_size, shuffle, num_workers)
 
     lr = 0.001
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    loss = torch.nn.NLLLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    loss = torch.nn.CrossEntropyLoss()
 
-    training_reg = Training_Procedure(
+    training_class = Training_Procedure(
         model=model,
         train_dataloader=train_classLoader,
         val_dataloader=val_classLoader,
@@ -84,9 +86,12 @@ def main():
         shuffle=True, num_workers=0, lr=lr, savename=result
     )
 
-    trainLoss, trainAcc, valLoss, valAcc = training_reg.process()
+    trainLoss, trainAcc, valLoss, valAcc = training_class.process()
     viz_res(root, result+"/", trainLoss, trainAcc, valLoss, valAcc, result)
 
 
+print("Start training:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 main()
+print("Finish training:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
 # print(torch.cuda.is_available())

@@ -33,7 +33,7 @@ def main():
     # Data parameters
     batch_size = 64
     num_workers = 0
-    subset = 1000
+    subset = None
     root_dir = './'
     shuffle = False
     train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size, \

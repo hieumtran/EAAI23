@@ -1,6 +1,6 @@
 import numpy as np
-from PyTorch_reg.dataloader import Dataloader
-from PyTorch_reg.procedure import procedure
+from dataloader import Dataloader
+from procedure import procedure
 import torch
 import torch.nn as nn
 # from design.vgg_simple import VGG_simple # VGG-16

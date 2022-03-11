@@ -144,7 +144,7 @@ def test_model(test_data, aspect,
     plt.plot(ckpt[aspect[0]])
     plt.plot(ckpt[aspect[1]])
     plt.grid()
-    plt.savefig('./sp_trans.jpg')
+    plt.savefig('./resnet.jpg')
     # plt.show()
 
     model.load_state_dict(ckpt['model_state_dict'])
@@ -157,8 +157,12 @@ def test_model(test_data, aspect,
     model.eval()  # Canceling regularization
     for (batchX, batchY) in batch(x_test, y_test, batch_size):
         (batchX, batchY) = (torch.from_numpy(batchX).to(device), torch.from_numpy(batchY).to(device))
+<<<<<<< HEAD
         loss, val_loss, ars_loss = eval(input=batchX, output=batchY, optimizer=optimizer, loss_func=loss_func,
                                         model=model, training=False)
+=======
+        loss = eval(input=batchX, output=batchY, optimizer=optimizer, loss_func=loss_func, model=model, training=False)
+>>>>>>> 7c835e6a5d5d7d2ced54dd98ff9fad00039b8632
         avg_test_total_loss += loss
         avg_test_val_loss += val_loss
         avg_test_ars_loss += ars_loss

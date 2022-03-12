@@ -32,9 +32,9 @@ def load_data(root, batch_size, subset, num_workers, shuffle):
 
 def main():
     # Data parameters
-    batch_size = 64
+    batch_size = 32
     num_workers = 0
-    subset = None
+    subset = 1000
     root_dir = './'
     shuffle = False
     train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size,

@@ -88,7 +88,7 @@ class ResNet(nn.Module):
         self.conv4_x2 = BottleNeck(input_dim=512 * self.expansion, output_dim=512, upsample=False, stride=1, padding=1)
 
         # Linear Layer
-        self.linear1 = nn.Linear(2048 * 7 * 7, 1000)
+        self.linear1 = nn.Linear(2048, 1000)
         self.linear2 = nn.Linear(1000, 1000)
         self.linear3 = nn.Linear(1000, 2)
 

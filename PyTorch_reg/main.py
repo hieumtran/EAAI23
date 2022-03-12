@@ -49,7 +49,7 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # Init model & Optimizer
-    res_net = ResNet(256, [64, 256], 1).to(device).float()
+    res_net = ResNet(res_learning=[3, 4, 6, 3]).to(device).float()
     optimizer = torch.optim.SGD(res_net.parameters(), lr=1e-3)
 
     # procedure init

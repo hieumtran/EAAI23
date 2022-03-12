@@ -88,9 +88,12 @@ class ResNet(nn.Module):
         self.conv4_x2 = BottleNeck(input_dim=512 * self.expansion, output_dim=512, upsample=False, stride=1, padding=1)
 
         # Linear Layer
-        self.linear1 = nn.Linear(2048 * 7 * 7, 256)
-        self.linear2 = nn.Linear(256, 256)
-        self.linear3 = nn.Linear(256, 2)
+        self.linear1 = nn.Linear(2048 * 7 * 7, 1000)
+        self.linear2 = nn.Linear(1000, 1000)
+        self.linear3 = nn.Linear(1000, 2)
+
+        # Average Pooling
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
     def forward(self, x):
         x = self.input_conv(x)
@@ -117,6 +120,8 @@ class ResNet(nn.Module):
         x = self.conv4_x(x)
         for _ in range(self.res_learning[3] - 1):
             x = self.conv4_x2(x)
+
+        x = self.avgpool(x)
 
         # Flatten
         x = x.view(x.size(0), -1)

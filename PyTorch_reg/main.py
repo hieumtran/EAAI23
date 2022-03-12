@@ -44,7 +44,7 @@ def main():
     start_epoch = 1
     end_epoch = 24
     loss_func = L2_dist
-    save_path = './PyTorch_reg/design/resnet/resnet_'
+    save_path = './PyTorch_reg/design/resnet/resnet50_'
     save_fig = './PyTorch_reg/figure/ResNet_loss'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

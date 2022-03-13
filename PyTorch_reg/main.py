@@ -54,7 +54,8 @@ def main():
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
 
     # procedure init
-    proceed = procedure(optimizer=scheduler, loss_func=loss_func, model=res_net,
+    proceed = procedure(optimizer=optimizer, scheduler=scheduler,
+                        loss_func=loss_func, model=res_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
     proceed.fit(train_loader, val_loader)

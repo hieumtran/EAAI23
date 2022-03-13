@@ -44,16 +44,17 @@ def main():
     start_epoch = 1
     end_epoch = 24
     loss_func = L2_dist
-    save_path = './PyTorch_reg/design/resnet/resnet50_'
+    save_path = './PyTorch_reg/design/resnet/resnet_'
     save_fig = './PyTorch_reg/figure/ResNet_loss'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # Init model & Optimizer
     res_net = ResNet(res_learning=[3, 4, 6, 3]).to(device).float()
-    optimizer = torch.optim.SGD(res_net.parameters(), lr=1e-3)
+    optimizer = torch.optim.SGD(res_net.parameters(), lr=1e-1, momentum=0.9, weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
 
     # procedure init
-    proceed = procedure(optimizer=optimizer, loss_func=loss_func, model=res_net,
+    proceed = procedure(optimizer=scheduler, loss_func=loss_func, model=res_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
     proceed.fit(train_loader, val_loader)

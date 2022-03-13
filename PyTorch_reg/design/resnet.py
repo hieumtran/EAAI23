@@ -19,6 +19,8 @@ class BottleNeck(nn.Module):
 
         # Regularization: Batch Normalization
         self.norm_layer1 = nn.BatchNorm2d(output_dim)
+        self.norm_layer2 = nn.BatchNorm2d(output_dim)
+        self.norm_layer3 = nn.BatchNorm2d(output_dim*4)
 
         # Up sampling
         self.upsample = upsample
@@ -38,11 +40,12 @@ class BottleNeck(nn.Module):
 
         # Layer 2
         output = self.conv2(output)
-        output = self.norm_layer1(output)
+        output = self.norm_layer2(output)
         output = self.relu(output)
 
         # Layer 3
         output = self.conv3(output)
+        output = self.norm_layer3(output)
 
         # Up sampling
         if self.upsample:
@@ -88,12 +91,15 @@ class ResNet(nn.Module):
         self.conv4_x2 = BottleNeck(input_dim=512 * self.expansion, output_dim=512, upsample=False, stride=1, padding=1)
 
         # Linear Layer
-        self.linear1 = nn.Linear(2048, 1000)
-        self.linear2 = nn.Linear(1000, 1000)
-        self.linear3 = nn.Linear(1000, 2)
+        self.linear1 = nn.Linear(2048, 1024)
+        self.linear2 = nn.Linear(1024, 1024)
+        self.linear3 = nn.Linear(1024, 2)
 
         # Average Pooling
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+
+        # Define proportion or neurons to dropout
+        self.dropout = nn.Dropout(0.7)
 
     def forward(self, x):
         x = self.input_conv(x)
@@ -128,5 +134,7 @@ class ResNet(nn.Module):
 
         # Linear Layer
         x = self.relu(self.linear1(x))
+        x = self.dropout(x)
         x = self.relu(self.linear2(x))
+        x = self.dropout(x)
         return self.linear3(x)

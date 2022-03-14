@@ -22,6 +22,9 @@ train_set
 val_set
 ./data/archive/*
 
+# Ignore figure
+*.jpg
+
 # Ignore PyTorch save file
 PyTorch_reg/design/vgg_simple_checkpoint/
 PyTorch_reg/design/spatial_transformer/

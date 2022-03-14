@@ -59,7 +59,7 @@ class procedure:
             # Optimizer step and Backpropagation
             if training:
                 loss.backward()
-                self.scheduler.step()
+                self.scheduler.step(loss)
 
             # Loss and samples size for evaluation
             sum_loss += loss.item() * (2 * batchY.size(0))
@@ -101,4 +101,10 @@ class procedure:
         self.val_arr = ckpt['val_arr']
 
     def visualize(self, save_fig):
-        pass
+        plt.plot(self.train_arr, label='Train loss')
+        plt.plot(self.val_arr, label='Test loss')
+        plt.legend()
+        plt.grid()
+        plt.tight_layout()
+        plt.savefig(save_fig, dpi=500)
+        # plt.show()

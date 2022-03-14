@@ -1,9 +1,8 @@
 import torch
-import numpy as np
-from PIL import Image
 import timeit
 import matplotlib.pyplot as plt
 import datetime
+from loss_function import RMSE
 
 
 class procedure:
@@ -24,64 +23,83 @@ class procedure:
         self.scheduler = scheduler  # scheduler for optimizer
 
     def fit(self, train_loader, val_loader):
-        output_template = 'Epoch {} / train: {:.10f} / val: {:.10f}  / Time: {:.5f}s / Current date & ' \
-                          'Time: {:%Y-%m-%d %H:%M:%S}'
+        output_template = 'Epoch {} |' \
+                          'train: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} |'  \
+                          'val: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} |' \
+                          'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         for epoch in range(self.start_epoch, self.end_epoch + 1):
             epoch_start = timeit.default_timer()
 
             # Update loss and optimizer
-            train_loss = self.train_val_test(train_loader, training=True)
-            val_loss = self.train_val_test(val_loader, training=False)
+            train_loss, rmse_val_train, rmse_ars_train = self.train_val_test(train_loader, training=True)
+            self.scheduler.step(train_loss)
+            val_loss, rmse_val_val, rmse_ars_val = self.train_val_test(val_loader, training=False)
+
             self.train_arr.append(train_loss)
             self.val_arr.append(val_loss)
 
             self.save_model(epoch)  # Saving model
-            print(output_template.format(epoch, train_loss, val_loss, timeit.default_timer() - epoch_start,
+            print(output_template.format(epoch, train_loss, rmse_val_train, rmse_ars_train,
+                                         val_loss, rmse_val_val, rmse_ars_val,
+                                         timeit.default_timer() - epoch_start,
                                          datetime.datetime.now()))
 
     def train_val_test(self, loader, training):
         if training:
             self.model.train()
-            log_template = 'Training mini-batch {}: {:.10f} / Time: {:.5f}s / Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+            log_template = 'Training mini-batch {}: {:.8f} | Time: {:.5f}s |' \
+                           'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         else:
             self.model.eval()
-            log_template = 'Validation mini-batch {}: {:.10f} / Time: {:.5f}s / Current date & ' \
-                           'Time: {:%Y-%m-%d %H:%M:%S}'
-
+            log_template = 'Validation mini-batch {}: {:.8f} | Time: {:.5f}s |' \
+                           'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+        total_val = []
+        total_ars = []
         # Init computation variables
         samples, batch_cnt, sum_loss = (0, 0, 0)
         for (batchX, batchY) in loader:
             start = timeit.default_timer()
             (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float())  # Load data
             if training: self.optimizer.zero_grad()  # Zero grad before mini-batch
-            loss = self.loss_compute(batchX, batchY)  # Forward model
+            pred, loss = self.loss_compute(batchX, batchY)  # Forward model
 
             # Optimizer step and Backpropagation
             if training:
                 loss.backward()
-                self.scheduler.step(loss)
+                self.optimizer.step()
 
             # Loss and samples size for evaluation
             sum_loss += loss.item() * (2 * batchY.size(0))
             samples += batchY.size(0)  # sample size
             batch_cnt += 1
 
+            # Concat predict and truth value
+            # predict.append(pred.to('cpu'))
+            # truth.append(batchY.to('cpu'))
+            rmse_val, rmse_ars = RMSE(pred.to('cpu'), torch.reshape(batchY.to('cpu'), (-1, 2)))
+            total_val.append(rmse_val.item())
+            total_ars.append(rmse_ars.item())
             # Logging
             print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
-        return sum_loss / (2 * samples)
+            print('Current Learning rate: ' + str(self.optimizer.param_groups[0]['lr']))
+
+        return sum_loss / (2 * samples), torch.sqrt(torch.sum(torch.tensor(total_val)) / samples), \
+               torch.sqrt(torch.sum(torch.tensor(total_ars)) / samples)
 
     def loss_compute(self, input, output):
         input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
         output = torch.reshape(output, (-1, 2))
         predict = self.model(input.float())
         loss = self.loss_func(predict.float(), output.float(), output.size(0))
-        return loss
+        return predict, loss
 
     def test(self, test_loader):
         start = timeit.default_timer()
-        output_template = 'Test: {:.10f} / Time: {:.5f}s / Current date & Time: {:%Y-%m-%d %H:%M:%S}'
-        test_loss = self.train_val_test(test_loader, training=False)
-        print(output_template.format(test_loss, timeit.default_timer() - start, datetime.datetime.now()))
+        output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | Time: {:.5f}s | ' \
+                          'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+        test_loss, rmse_val, rmse_ars = self.train_val_test(test_loader, training=False)
+        print(output_template.format(test_loss, rmse_val.item(), rmse_ars.item(),
+                                     timeit.default_timer() - start, datetime.datetime.now()))
 
     def save_model(self, curr_epoch):
         torch.save({
@@ -94,10 +112,12 @@ class procedure:
 
     def load_model(self, load_path):
         ckpt = torch.load(load_path)
+        # print(ckpt['model_state_dict'].keys())
         self.model.load_state_dict(ckpt['model_state_dict'])
-        self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
-        self.start_epoch = ckpt['epoch']
+        # self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+        # self.start_epoch = ckpt['epoch']
         self.train_arr = ckpt['train_arr']
+        # print(self.train_arr)
         self.val_arr = ckpt['val_arr']
 
     def visualize(self, save_fig):

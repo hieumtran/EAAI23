@@ -34,7 +34,8 @@ def main():
     # Data parameters
     batch_size = 16
     num_workers = 0
-    subset = None
+    # subset = None
+    subset = 1000
     root_dir = './'
     shuffle = False
     train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size,
@@ -44,23 +45,24 @@ def main():
     start_epoch = 1
     end_epoch = 30
     loss_func = L2_dist
-    save_path = './PyTorch_reg/design/resnet/resnet101_'
+    save_path = './PyTorch_reg/design/resnet/resnet50_'
     save_fig = './PyTorch_reg/figure/ResNet_loss'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # Init model & Optimizer
-    res_net = ResNet(res_learning=[3, 4, 23, 3]).to(device).float()
-    optimizer = torch.optim.SGD(res_net.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
+    # res_net = ResNet(res_learning=[3, 4, 23, 3]).to(device).float()
+    res_net = ResNet(res_learning=[3, 4, 6, 3]).to(device).float()
+    optimizer = torch.optim.SGD(res_net.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0001)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3)
 
     # procedure init
     proceed = procedure(optimizer=optimizer, scheduler=scheduler,
                         loss_func=loss_func, model=res_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    # proceed.fit(train_loader, val_loader)
-    proceed.load_model('./PyTorch_reg/design/resnet/resnet50_24.pt')
-    proceed.visualize('./PyTorch_reg/figure/ResNet_loss.jpg')
+    proceed.fit(train_loader, val_loader)
+    proceed.load_model('./PyTorch_reg/design/resnet/resnet50_30.pt')
+    proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
     proceed.test(test_loader)
 
 

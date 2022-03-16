@@ -1,13 +1,14 @@
 import torch
 import matplotlib.pyplot as plt
 from AlexNet_Model import AlexNet_Reg, AlexNet_Class
-from Training_Procedure import Training_Procedure
+from TrainingProcedure_Reg import Training_Procedure
 from DataLoader import Dataloader
 from datetime import datetime
+from lossFunc import L2_dist
 
 
-def viz_res(root, dest_folder, trainLoss, trainAcc, valLoss, valAcc, savename=None):
-    plt.figure(figsize=(15, 7))
+def viz_res(root, dest_folder, trainLoss, val_trainAcc, ars_trainAcc, valLoss, val_valAcc, ars_valAcc, savename=None):
+    plt.figure(figsize=(15, 10))
 
     plt.subplot(1, 2, 1)  # row 1, col 2 index 1
     plt.plot(trainLoss, color='#17bccf', label='Train')
@@ -18,8 +19,10 @@ def viz_res(root, dest_folder, trainLoss, trainAcc, valLoss, valAcc, savename=No
     plt.legend()
 
     plt.subplot(1, 2, 2)  # index 2
-    plt.plot(trainAcc, color='#17bccf', label='Train')
-    plt.plot(valAcc, color='#ff7f44', label='Val')
+    plt.plot(val_trainAcc, color='#17bccf', label='Valence Train')
+    plt.plot(ars_trainAcc, color='#20bccf', label='Arousal Train')
+    plt.plot(val_valAcc, color='#ff7f30', label='Valence Val')
+    plt.plot(ars_valAcc, color='#ff7f44', label='Valence Val')
     plt.title('Accuracy')
     plt.xlabel('Epochs')
     plt.grid()
@@ -35,12 +38,12 @@ def viz_res(root, dest_folder, trainLoss, trainAcc, valLoss, valAcc, savename=No
 def main():
 
     root = "../"
-    result = "AlexNet_torch_20220310"
+    result = "AlexNet_torch_20220314"
 
-    batch_size = 32
+    batch_size = 256
     shuffle = True
     num_workers = 0
-    regression = False
+    regression = True
 
     train_image_dir = "data/train_set/images/"
     train_reg_frame = "train_reg.csv"
@@ -54,7 +57,8 @@ def main():
     test_reg_frame = "test_reg.csv"
     test_class_frame = "test_class.csv"
 
-    model = AlexNet_Class()
+    model = AlexNet_Reg()
+
     train_classLoader = Dataloader(root, train_image_dir, train_class_frame).load_batch(
         batch_size, shuffle, num_workers)
     train_regLoader = Dataloader(root, train_image_dir, train_reg_frame, regression=regression).load_batch(
@@ -72,22 +76,22 @@ def main():
 
     lr = 0.001
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
-    loss = torch.nn.CrossEntropyLoss()
+    loss = L2_dist
 
     training_class = Training_Procedure(
         model=model,
-        train_dataloader=train_classLoader,
-        val_dataloader=val_classLoader,
-        test_dataloader=test_classLoader,
+        train_dataloader=train_regLoader,
+        val_dataloader=val_regLoader,
+        test_dataloader=test_regLoader,
         batch_size=batch_size,
         epochs=20,
         optimizer=optimizer,
         loss_func=loss,
-        shuffle=True, num_workers=0, lr=lr, savename=result
+        shuffle=True, num_workers=0, lr=lr, savename="output/reg_20220314/"+result, regression=regression
     )
 
-    trainLoss, trainAcc, valLoss, valAcc = training_class.process()
-    viz_res(root, result+"/", trainLoss, trainAcc, valLoss, valAcc, result)
+    trainLoss, val_trainRMSE, ars_trainRMSE, valLoss, val_valRMSE, ars_valRMSE = training_class.process()
+    viz_res(root, "AlexNet_pytorch/output/", trainLoss, val_trainRMSE, ars_trainRMSE, valLoss, val_valRMSE, ars_valRMSE, result)
 
 
 print("Start training:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))

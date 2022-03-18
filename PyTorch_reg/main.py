@@ -34,8 +34,8 @@ def main():
     # Data parameters
     batch_size = 16
     num_workers = 0
-    # subset = None
-    subset = 1000
+    subset = None
+    # subset = 1000
     root_dir = './'
     shuffle = False
     train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size,
@@ -60,10 +60,11 @@ def main():
                         loss_func=loss_func, model=res_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    proceed.fit(train_loader, val_loader)
-    proceed.load_model('./PyTorch_reg/design/resnet/resnet50_30.pt')
-    proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
-    proceed.test(test_loader)
+    # proceed.fit(train_loader, val_loader)
+    for i in range(1, 31):
+        proceed.load_model('./PyTorch_reg/design/resnet/resnet50_' + str(i) + '.pt')
+    # proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
+        proceed.test(test_loader)
 
 
 if __name__ == '__main__':

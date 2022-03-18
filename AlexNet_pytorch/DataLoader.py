@@ -35,7 +35,7 @@ class Dataset(Dataset):
         images = Image.open(img_name)
         if (self.regression):
             labels = self.label_frame.iloc[idx, 1:]
-            labels = (np.array([labels])).astype('float').reshape(-1, 2)
+            labels = np.array([labels]).astype('float').reshape(-1, 2)
         else:
             labels = self.label_frame.iloc[idx, 1]
             labels = (np.array(labels)).astype("int")

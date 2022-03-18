@@ -2,7 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 from AlexNet_Model import AlexNet_Reg, AlexNet_Class
 from Training_Procedure import Training_Procedure
-from DataLoader import Dataloader
+from DataLoader import Dataloader, Dataset
 
 
 def main():

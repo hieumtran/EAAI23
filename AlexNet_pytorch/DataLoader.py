@@ -42,6 +42,7 @@ class Dataset(Dataset):
 
         if (self.transform):
             images = self.transform(images)
+            labels = self.transform(labels)
 
         return images, labels
 
@@ -53,8 +54,8 @@ class Dataloader():
         transform=transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(
-                mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225])]),
+                mean=[0.5686, 0.4505, 0.3990],
+                std=[0.2332, 0.2064, 0.1956])]),
         regression=False
     ):
         """

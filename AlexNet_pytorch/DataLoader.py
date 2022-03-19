@@ -42,7 +42,7 @@ class Dataset(Dataset):
 
         if (self.transform):
             images = self.transform(images)
-            labels = self.transform(labels)
+        labels = transforms.ToTensor(labels)
 
         return images, labels
 

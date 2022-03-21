@@ -61,10 +61,9 @@ def main():
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
     # proceed.fit(train_loader, val_loader)
-    for i in range(1, 31):
-        proceed.load_model('./PyTorch_reg/design/resnet/resnet50_' + str(i) + '.pt')
-    # proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
-        proceed.test(test_loader)
+    proceed.load_model('./PyTorch_reg/design/resnet/resnet50_30.pt')
+    proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
+    proceed.test(test_loader)
 
 
 if __name__ == '__main__':

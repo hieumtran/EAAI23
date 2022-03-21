@@ -53,8 +53,10 @@ class procedure:
             self.model.eval()
             log_template = 'Validation mini-batch {}: {:.8f} | Time: {:.5f}s |' \
                            'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
-        total_val = []
-        total_ars = []
+        # total_val = []
+        # total_ars = []
+        predict = []
+        truth = []
         # Init computation variables
         samples, batch_cnt, sum_loss = (0, 0, 0)
         for (batchX, batchY) in loader:
@@ -72,23 +74,19 @@ class procedure:
             sum_loss += loss.item() * (2 * batchY.size(0))
             samples += batchY.size(0)  # sample size
             batch_cnt += 1
-
+            
             # Concat predict and truth value
-            # predict.append(pred.to('cpu'))
-            # truth.append(batchY.to('cpu'))
-            rmse_val, rmse_ars = RMSE(pred.to('cpu'), torch.reshape(batchY.to('cpu'), (-1, 2)))
-            total_val.append(rmse_val.item())
-            total_ars.append(rmse_ars.item())
+            with torch.no_grad():
+                predict.append(pred.to('cpu'))
+                truth.append(batchY.to('cpu'))
+
             # Logging
             print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
-            print('Current Learning rate: ' + str(self.optimizer.param_groups[0]['lr']))
 
-        return sum_loss / (2 * samples), torch.sqrt(torch.sum(torch.tensor(total_val)) / samples), \
-               torch.sqrt(torch.sum(torch.tensor(total_ars)) / samples)
+        return sum_loss / (2 * samples), torch.concat(predict), torch.concat(truth)
 
     def loss_compute(self, input, output):
         input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
-        output = torch.reshape(output, (-1, 2))
         predict = self.model(input.float())
         loss = self.loss_func(predict.float(), output.float(), output.size(0))
         return predict, loss

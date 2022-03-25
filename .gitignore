@@ -37,5 +37,5 @@ PyTorch_reg/design/resnet/
 __pycache__/
 
 # Ignore log files
-PyTorch_reg/log/*.txt
+*.txt
 

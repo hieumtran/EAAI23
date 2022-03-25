@@ -2,8 +2,7 @@ import torch
 import timeit
 import matplotlib.pyplot as plt
 import datetime
-from loss_function import RMSE
-
+from loss_function import rmse, pear, ccc, sagr
 
 class procedure:
     def __init__(self, optimizer, scheduler,
@@ -61,7 +60,8 @@ class procedure:
         samples, batch_cnt, sum_loss = (0, 0, 0)
         for (batchX, batchY) in loader:
             start = timeit.default_timer()
-            (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float())  # Load data
+            (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float())  # Load data2
+            batchY = batchY.reshape(-1, 2)
             if training: self.optimizer.zero_grad()  # Zero grad before mini-batch
             pred, loss = self.loss_compute(batchX, batchY)  # Forward model
 
@@ -81,22 +81,29 @@ class procedure:
                 truth.append(batchY.to('cpu'))
 
             # Logging
-            print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
+            # print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
 
         return sum_loss / (2 * samples), torch.concat(predict), torch.concat(truth)
 
     def loss_compute(self, input, output):
         input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
         predict = self.model(input.float())
-        loss = self.loss_func(predict.float(), output.float(), output.size(0))
+        loss = self.loss_func(predict.float(), output.float())
         return predict, loss
 
     def test(self, test_loader):
         start = timeit.default_timer()
-        output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | Time: {:.5f}s | ' \
-                          'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
-        test_loss, rmse_val, rmse_ars = self.train_val_test(test_loader, training=False)
-        print(output_template.format(test_loss, rmse_val.item(), rmse_ars.item(),
+        output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | P_Val: {:.8f} | P_Ars: {:.8f} | C_Val: {:.8f} | C_Ars: {:.8f} | S_Val: {:.8f} | S_Ars: {:.8f} |' 
+        time_template =  'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+        output_template += time_template
+        test_loss, predict, truth = self.train_val_test(test_loader, training=False)
+
+        rmse_val, rmse_ars = rmse(predict, truth)
+        pear_val, pear_ars = pear(predict, truth)
+        ccc_val, ccc_ars = ccc(predict, truth)
+        sagr_val, sagr_ars = sagr(predict, truth)
+        
+        print(output_template.format(test_loss, rmse_val, rmse_ars, pear_val, pear_ars, ccc_val, ccc_ars, sagr_val, sagr_ars,
                                      timeit.default_timer() - start, datetime.datetime.now()))
 
     def save_model(self, curr_epoch):

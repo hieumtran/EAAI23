@@ -42,8 +42,8 @@ def main():
                                                       subset=subset, num_workers=num_workers, shuffle=shuffle)
 
     # Model parameters
-    start_epoch = 1
-    end_epoch = 30
+    start_epoch = 30
+    end_epoch = 50
     loss_func = L2_dist
     save_path = './PyTorch_reg/design/resnet/resnet50_'
     save_fig = './PyTorch_reg/figure/ResNet_loss'
@@ -60,10 +60,12 @@ def main():
                         loss_func=loss_func, model=res_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    # proceed.fit(train_loader, val_loader)
     proceed.load_model('./PyTorch_reg/design/resnet/resnet50_30.pt')
-    proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
-    proceed.test(test_loader)
+    proceed.fit(train_loader, val_loader)
+    # for i in range(1, 31):
+    #     proceed.load_model('./PyTorch_reg/design/resnet/resnet50_' + str(i) + '.pt')
+    #     # proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
+    #     proceed.test(test_loader)
 
 
 if __name__ == '__main__':

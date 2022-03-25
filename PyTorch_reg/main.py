@@ -9,7 +9,7 @@ from design.resnet import ResNet
 from loss_function import L2_dist
 
 
-def load_data(root, batch_size, subset, num_workers, shuffle):
+def load_data(root, batch_size, num_workers, subset, shuffle):
     # Data loading
     train_image_dir = "data/train_set/images/"
     train_reg_frame = "train_reg.csv"
@@ -20,11 +20,11 @@ def load_data(root, batch_size, subset, num_workers, shuffle):
     test_image_dir = "data/val_set/images/"
     test_reg_frame = "test_reg.csv"
 
-    train = Dataloader(root=root, image_dir=train_image_dir, subset=subset, label_frame=train_reg_frame,
+    train = Dataloader(root=root, image_dir=train_image_dir, label_frame=train_reg_frame, subset=subset,
                        regression=True).load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-    val = Dataloader(root=root, image_dir=val_image_dir, subset=subset, label_frame=val_reg_frame,
+    val = Dataloader(root=root, image_dir=val_image_dir, label_frame=val_reg_frame, subset=subset,
                      regression=True).load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-    test = Dataloader(root=root, image_dir=test_image_dir, subset=subset, label_frame=test_reg_frame,
+    test = Dataloader(root=root, image_dir=test_image_dir, label_frame=test_reg_frame, subset=subset,
                       regression=True).load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
     return train, val, test
@@ -34,12 +34,11 @@ def main():
     # Data parameters
     batch_size = 16
     num_workers = 0
-    subset = None
-    # subset = 1000
+    # subset = None
+    subset = 1000
     root_dir = './'
     shuffle = False
-    train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size,
-                                                      subset=subset, num_workers=num_workers, shuffle=shuffle)
+    train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size, subset=subset, num_workers=num_workers, shuffle=shuffle)
 
     # Model parameters
     start_epoch = 30

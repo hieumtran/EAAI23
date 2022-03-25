@@ -23,23 +23,21 @@ class procedure:
 
     def fit(self, train_loader, val_loader):
         output_template = 'Epoch {} |' \
-                          'train: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} |'  \
-                          'val: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} |' \
+                          'train: {:.8f} | val: {:.8f} |' \
                           'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         for epoch in range(self.start_epoch, self.end_epoch + 1):
             epoch_start = timeit.default_timer()
 
             # Update loss and optimizer
-            train_loss, rmse_val_train, rmse_ars_train = self.train_val_test(train_loader, training=True)
+            train_loss, _, _ = self.train_val_test(train_loader, training=True)
             self.scheduler.step(train_loss)
-            val_loss, rmse_val_val, rmse_ars_val = self.train_val_test(val_loader, training=False)
+            val_loss, _, _ = self.train_val_test(val_loader, training=False)
 
             self.train_arr.append(train_loss)
             self.val_arr.append(val_loss)
 
             self.save_model(epoch)  # Saving model
-            print(output_template.format(epoch, train_loss, rmse_val_train, rmse_ars_train,
-                                         val_loss, rmse_val_val, rmse_ars_val,
+            print(output_template.format(epoch, train_loss, val_loss,
                                          timeit.default_timer() - epoch_start,
                                          datetime.datetime.now()))
 
@@ -52,16 +50,14 @@ class procedure:
             self.model.eval()
             log_template = 'Validation mini-batch {}: {:.8f} | Time: {:.5f}s |' \
                            'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
-        # total_val = []
-        # total_ars = []
         predict = []
         truth = []
+        
         # Init computation variables
         samples, batch_cnt, sum_loss = (0, 0, 0)
         for (batchX, batchY) in loader:
             start = timeit.default_timer()
             (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float())  # Load data2
-            batchY = batchY.reshape(-1, 2)
             if training: self.optimizer.zero_grad()  # Zero grad before mini-batch
             pred, loss = self.loss_compute(batchX, batchY)  # Forward model
 
@@ -81,13 +77,14 @@ class procedure:
                 truth.append(batchY.to('cpu'))
 
             # Logging
-            # print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
+            print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
 
         return sum_loss / (2 * samples), torch.concat(predict), torch.concat(truth)
 
     def loss_compute(self, input, output):
         input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
         predict = self.model(input.float())
+        output = output.reshape(-1, 2)
         loss = self.loss_func(predict.float(), output.float())
         return predict, loss
 

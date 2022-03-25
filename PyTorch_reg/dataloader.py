@@ -10,7 +10,7 @@ from torchvision import transforms
 # inherit the torch.utils.data.Dataset class
 class Dataset(Dataset):
 
-    def __init__(self, image_dir, label_frame, regression=False, transform=None):
+    def __init__(self, image_dir, label_frame, regression=False, subset=None, transform=None):
         """
         Args:
             image_dir (string): Directory with all the images.
@@ -22,6 +22,7 @@ class Dataset(Dataset):
         self.label_frame = pd.read_csv(label_frame)
         self.regression = regression
         self.transform = transform
+        self.subset = subset
 
     def __len__(self):
         return self.label_frame.shape[0]
@@ -35,14 +36,16 @@ class Dataset(Dataset):
         images = Image.open(img_name)
         if (self.regression):
             labels = self.label_frame.iloc[idx, 1:]
+            if self.subset != None: labels = labels.iloc[:self.subset, :]
+            print(labels)
             labels = np.array([labels]).astype('float').reshape(-1, 2)
         else:
             labels = self.label_frame.iloc[idx, 1]
+            if self.subset != None: labels = labels.iloc[:self.subset, :]
             labels = (np.array(labels)).astype("int")
 
         if (self.transform):
             images = self.transform(images)
-        labels = transforms.ToTensor(labels)
 
         return images, labels
 
@@ -56,7 +59,7 @@ class Dataloader():
             transforms.Normalize(
                 mean=[0.5686, 0.4505, 0.3990],
                 std=[0.2332, 0.2064, 0.1956])]),
-        regression=False
+        regression=False, subset = None
     ):
         """
         Args:
@@ -73,6 +76,7 @@ class Dataloader():
         self.label_frame = root + "data/" + label_frame
         self.regression = regression
         self.transform = transform
+        self.subset = subset
 
     def load_batch(self, batch_size, shuffle=False, num_workers=0):
         """
@@ -85,10 +89,8 @@ class Dataloader():
             torch.utils.data.DataLoader object. Looping through the DataLoader object \
                 will return the corresponding batchX, batchY.
         """
-
-        dataset = Dataset(self.image_dir, self.label_frame,
-                          transform=self.transform, regression=self.regression)
-        batch_iter = DataLoader(
-            dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        
+        dataset = Dataset(self.image_dir, self.label_frame, subset=self.subset, transform=self.transform, regression=self.regression)
+        batch_iter = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
         return batch_iter

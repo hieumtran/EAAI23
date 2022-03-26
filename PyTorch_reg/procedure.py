@@ -29,9 +29,9 @@ class procedure:
             epoch_start = timeit.default_timer()
 
             # Update loss and optimizer
-            train_loss, _, _ = self.train_val_test(train_loader, training=True)
+            train_loss = self.train_val_test(train_loader, state='train')
             self.scheduler.step(train_loss)
-            val_loss, _, _ = self.train_val_test(val_loader, training=False)
+            val_loss = self.train_val_test(val_loader, state='val')
 
             self.train_arr.append(train_loss)
             self.val_arr.append(val_loss)
@@ -41,15 +41,19 @@ class procedure:
                                          timeit.default_timer() - epoch_start,
                                          datetime.datetime.now()))
 
-    def train_val_test(self, loader, training):
-        if training:
+    def train_val_test(self, loader, state):
+        assert state in ['train', 'test', 'val']
+        if state == 'train':
             self.model.train()
-            log_template = 'Training mini-batch {}: {:.8f} | Time: {:.5f}s |' \
-                           'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+            init_log = 'Train '
+        elif state == 'val':
+            self.model.eval()
+            init_log = 'Val '
         else:
             self.model.eval()
-            log_template = 'Validation mini-batch {}: {:.8f} | Time: {:.5f}s |' \
-                           'Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+            init_log = 'Test '
+            
+        log_template = init_log + 'mini-batch {}: {:.8f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         predict = []
         truth = []
         
@@ -58,11 +62,11 @@ class procedure:
         for (batchX, batchY) in loader:
             start = timeit.default_timer()
             (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float())  # Load data2
-            if training: self.optimizer.zero_grad()  # Zero grad before mini-batch
+            if state == 'train': self.optimizer.zero_grad()  # Zero grad before mini-batch
             pred, loss = self.loss_compute(batchX, batchY)  # Forward model
 
             # Optimizer step and Backpropagation
-            if training:
+            if state == 'train':
                 loss.backward()
                 self.optimizer.step()
 
@@ -72,14 +76,15 @@ class procedure:
             batch_cnt += 1
             
             # Concat predict and truth value
-            with torch.no_grad():
-                predict.append(pred.to('cpu'))
-                truth.append(batchY.to('cpu'))
+            if state == 'test':
+                with torch.no_grad():
+                    predict.append(pred.to('cpu'))
+                    truth.append(batchY.to('cpu'))
 
             # Logging
             print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
-
-        return sum_loss / (2 * samples), torch.concat(predict), torch.concat(truth)
+        if state == 'train' or state == 'val': return sum_loss / (2 * samples)
+        else: return sum_loss / (2 * samples), torch.concat(predict), torch.concat(truth)
 
     def loss_compute(self, input, output):
         input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
@@ -90,11 +95,13 @@ class procedure:
 
     def test(self, test_loader):
         start = timeit.default_timer()
-        output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | P_Val: {:.8f} | P_Ars: {:.8f} | C_Val: {:.8f} | C_Ars: {:.8f} | S_Val: {:.8f} | S_Ars: {:.8f} |' 
+        output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | P_Val: {:.8f} | P_Ars: {:.8f} |' \
+                            'C_Val: {:.8f} | C_Ars: {:.8f} | S_Val: {:.8f} | S_Ars: {:.8f} |' 
         time_template =  'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         output_template += time_template
-        test_loss, predict, truth = self.train_val_test(test_loader, training=False)
-
+        test_loss, predict, truth = self.train_val_test(test_loader, state='test')
+        
+        truth = truth.reshape(-1, 2)
         rmse_val, rmse_ars = rmse(predict, truth)
         pear_val, pear_ars = pear(predict, truth)
         ccc_val, ccc_ars = ccc(predict, truth)

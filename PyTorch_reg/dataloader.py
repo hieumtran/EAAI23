@@ -9,7 +9,6 @@ from torchvision import transforms
 
 # inherit the torch.utils.data.Dataset class
 class Dataset(Dataset):
-
     def __init__(self, image_dir, label_frame, regression=False, subset=None, transform=None):
         """
         Args:
@@ -22,8 +21,8 @@ class Dataset(Dataset):
         self.label_frame = pd.read_csv(label_frame)
         self.regression = regression
         self.transform = transform
-        self.subset = subset
-
+        if subset != None: self.label_frame = self.label_frame[:subset]
+        
     def __len__(self):
         return self.label_frame.shape[0]
 
@@ -34,14 +33,12 @@ class Dataset(Dataset):
         img_name = os.path.join(self.image_dir,
                                 self.label_frame.iloc[idx, 0])
         images = Image.open(img_name)
+        
         if (self.regression):
             labels = self.label_frame.iloc[idx, 1:]
-            if self.subset != None: labels = labels.iloc[:self.subset, :]
-            print(labels)
             labels = np.array([labels]).astype('float').reshape(-1, 2)
         else:
             labels = self.label_frame.iloc[idx, 1]
-            if self.subset != None: labels = labels.iloc[:self.subset, :]
             labels = (np.array(labels)).astype("int")
 
         if (self.transform):

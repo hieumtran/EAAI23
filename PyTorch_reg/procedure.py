@@ -96,7 +96,7 @@ class procedure:
     def test(self, test_loader):
         start = timeit.default_timer()
         output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | P_Val: {:.8f} | P_Ars: {:.8f} |' \
-                            'C_Val: {:.8f} | C_Ars: {:.8f} | S_Val: {:.8f} | S_Ars: {:.8f} |' 
+                            ' C_Val: {:.8f} | C_Ars: {:.8f} | S_Val: {:.8f} | S_Ars: {:.8f} |' 
         time_template =  'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         output_template += time_template
         test_loss, predict, truth = self.train_val_test(test_loader, state='test')

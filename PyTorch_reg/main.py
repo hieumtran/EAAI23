@@ -41,8 +41,8 @@ def main():
     train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size, subset=subset, num_workers=num_workers, shuffle=shuffle)
 
     # Model parameters
-    start_epoch = 31
-    end_epoch = 50
+    start_epoch = 51
+    end_epoch = 60
     loss_func = L2_dist
     save_path = './PyTorch_reg/design/resnet/resnet50_'
     save_fig = './PyTorch_reg/figure/ResNet_loss'
@@ -59,12 +59,12 @@ def main():
                         loss_func=loss_func, model=res_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    proceed.load_model('./PyTorch_reg/design/resnet/resnet50_30.pt')
-    # proceed.fit(train_loader, val_loader)
-    for i in range(1, 51):
-        proceed.load_model('./PyTorch_reg/design/resnet/resnet50_' + str(i) + '.pt')
-        proceed.test(test_loader)
-    proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
+    proceed.load_model('./PyTorch_reg/design/resnet/resnet50_50.pt')
+    proceed.fit(train_loader, val_loader)
+    # for i in range(1, 51):
+        # proceed.load_model('./PyTorch_reg/design/resnet/resnet50_' + str(i) + '.pt')
+        # proceed.test(test_loader)
+    # proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
         
 
 

@@ -39,3 +39,6 @@ __pycache__/
 # Ignore log files
 *.txt
 
+# Ignore .vscode
+.vscode/
+

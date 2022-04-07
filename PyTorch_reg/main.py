@@ -34,7 +34,7 @@ def load_data(root, batch_size, num_workers, subset, shuffle, validation):
 
 def main():
     # Data parameters
-    batch_size = 8
+    batch_size = 16
     num_workers = 0
     subset = None
     # subset = 1000
@@ -45,7 +45,7 @@ def main():
 
     # Model parameters
     start_epoch = 1
-    end_epoch = 30
+    end_epoch = 50
     loss_func = L2_dist
     save_path = './PyTorch_reg/design/simplenet/simplenet_'
     save_fig = './PyTorch_reg/figure/simplenet_loss'

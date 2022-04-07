@@ -21,6 +21,8 @@ bin-release/
 train_set
 val_set
 ./data/archive/*
+subset_data/
+*.tar
 
 # Ignore figure
 *.jpg
@@ -29,9 +31,7 @@ val_set
 PyTorch_reg/design/vgg_simple_checkpoint/
 PyTorch_reg/design/spatial_transformer/
 PyTorch_reg/design/resnet/
-
-# pycharm cache
-.idea/
+PyTorch_reg/design/simplenet/
 
 # Ignore pycache
 __pycache__/
@@ -41,4 +41,3 @@ __pycache__/
 
 # Ignore .vscode
 .vscode/
-

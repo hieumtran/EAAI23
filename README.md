@@ -6,7 +6,7 @@ An artificial intelligence (AI) system is “human-aware” when humans play an 
 * Python >= 3.8 (3.9 recommended)
 * Torch >= 1.10 (1.10.2=+cu113 recommended)
 * Pandas >= 1.2 (1.2.4 recommended)
-* Tensorflow = 2.4.0
+* Tensorflow = 2.4.0 (recommended)
 * Numpy >= 1.19 (1.19.3 recommended)
 
 ## Folder structure

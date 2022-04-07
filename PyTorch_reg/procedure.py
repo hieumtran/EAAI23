@@ -31,10 +31,12 @@ class procedure:
             # Update loss and optimizer
             train_loss = self.train_val_test(train_loader, state='train')
             self.scheduler.step(train_loss)
-            val_loss = self.train_val_test(val_loader, state='val')
-
             self.train_arr.append(train_loss)
-            self.val_arr.append(val_loss)
+
+            if val_loader != None:
+                val_loss = self.train_val_test(val_loader, state='val')
+                self.val_arr.append(val_loss)
+            else: val_loss = 0
 
             self.save_model(epoch)  # Saving model
             print(output_template.format(epoch, train_loss, val_loss,
@@ -121,12 +123,9 @@ class procedure:
 
     def load_model(self, load_path):
         ckpt = torch.load(load_path)
-        # print(ckpt['model_state_dict'].keys())
         self.model.load_state_dict(ckpt['model_state_dict'])
-        # self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
-        # self.start_epoch = ckpt['epoch']
+        self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
         self.train_arr = ckpt['train_arr']
-        # print(self.train_arr)
         self.val_arr = ckpt['val_arr']
 
     def visualize(self, save_fig):

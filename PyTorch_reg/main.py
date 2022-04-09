@@ -44,8 +44,8 @@ def main():
                                                       num_workers=num_workers, shuffle=shuffle, validation=False)
 
     # Model parameters
-    start_epoch = 1
-    end_epoch = 50
+    start_epoch = 100
+    end_epoch = 200
     loss_func = L2_dist
     save_path = './PyTorch_reg/design/simplenet/simplenet_'
     save_fig = './PyTorch_reg/figure/simplenet_loss'
@@ -65,6 +65,8 @@ def main():
                         loss_func=loss_func, model=simple_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
+    proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_100.pt')
+    # proceed.test(test_loader)
     proceed.fit(train_loader, val_loader)
     # for i in range(1, 51):
         # proceed.load_model('./PyTorch_reg/design/resnet/resnet50_' + str(i) + '.pt')

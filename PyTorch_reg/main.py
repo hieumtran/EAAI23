@@ -67,7 +67,7 @@ def main():
                         save_path=save_path, save_fig=save_fig)
     proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_100.pt')
     # proceed.test(test_loader)
-    proceed.fit(train_loader, val_loader)
+    # proceed.fit(train_loader, val_loader)
     for i in range(1, 200):
         proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
         proceed.test(test_loader)

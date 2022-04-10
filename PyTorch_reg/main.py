@@ -68,10 +68,10 @@ def main():
     proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_100.pt')
     # proceed.test(test_loader)
     proceed.fit(train_loader, val_loader)
-    # for i in range(1, 51):
-        # proceed.load_model('./PyTorch_reg/design/resnet/resnet50_' + str(i) + '.pt')
-        # proceed.test(test_loader)
-    # proceed.visualize('./PyTorch_reg/figure/ResNet50_loss.jpg')
+    for i in range(1, 200):
+        proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
+        proceed.test(test_loader)
+    proceed.visualize('./PyTorch_reg/figure/simplenet_loss.jpg')
         
 if __name__ == '__main__':
     main()

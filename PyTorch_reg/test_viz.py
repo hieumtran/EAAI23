@@ -54,7 +54,7 @@ def read_output(read_path, save_loc, save_name):
 
 def viz(arr, title, yaxis, path):
     plt.figure(figsize=(15,7))
-    plt.plot(arr, np.arange(1, len(arr)+1, 1), 'o-')
+    plt.plot(np.arange(1, len(arr)+1, 1), arr, 'o-')
     
     # X tick
     plt.xticks(np.arange(1, len(arr)+1, 1))

@@ -24,9 +24,6 @@ val_set
 subset_data/
 *.tar
 
-# Ignore figure
-*.jpg
-
 # Ignore PyTorch save file
 PyTorch_reg/design/vgg_simple_checkpoint/
 PyTorch_reg/design/spatial_transformer/

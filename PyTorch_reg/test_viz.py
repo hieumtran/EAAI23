@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
+import argparse
+import os
+import numpy as np
 
-def read_output(path):
-    text= open(path, 'r').read()
+def read_output(read_path, save_loc, save_name):
+    text= open(read_path, 'r').read()
     text = text.split('\n')
     
     # Series of metrics
@@ -19,27 +22,59 @@ def read_output(path):
             ccc_val.append(float(tmp_text[16])), ccc_ars.append(float(tmp_text[19]))
             sagr_val.append(float(tmp_text[22])), sagr_ars.append(float(tmp_text[25]))
     
-    viz(loss[:50], 'Euclidean', 'loss', './PyTorch_reg/figure/ResNet50_')
-    viz(rmse_val[:50], 'rmse_val', 'rmse', './PyTorch_reg/figure/ResNet50_')
-    viz(rmse_ars[:50], 'rmse_ars', 'rmse', './PyTorch_reg/figure/ResNet50_')
-    viz(corr_val[:50], 'corr_val', 'corr', './PyTorch_reg/figure/ResNet50_')
-    viz(corr_ars[:50], 'corr_ars', 'corr', './PyTorch_reg/figure/ResNet50_')
-    viz(ccc_val[:50], 'ccc_val', 'ccc', './PyTorch_reg/figure/ResNet50_')
-    viz(ccc_ars[:50], 'ccc_ars', 'ccc', './PyTorch_reg/figure/ResNet50_')
-    viz(sagr_val[:50], 'sagr_val', 'sagr', './PyTorch_reg/figure/ResNet50_')
-    viz(sagr_ars[:50], 'sagr_ars', 'sagr', './PyTorch_reg/figure/ResNet50_')
+    if os.path.isdir(save_loc) != True: os.mkdir(save_loc)
+    
+    viz(loss[:], 'Euclidean', 'loss', save_loc + save_name + '_')
+    viz(rmse_val[:], 'rmse_val', 'rmse', save_loc + save_name + '_')
+    viz(rmse_ars[:], 'rmse_ars', 'rmse', save_loc + save_name + '_')
+    viz(corr_val[:], 'corr_val', 'corr', save_loc + save_name + '_')
+    viz(corr_ars[:], 'corr_ars', 'corr', save_loc + save_name + '_')
+    viz(ccc_val[:], 'ccc_val', 'ccc', save_loc + save_name + '_')
+    viz(ccc_ars[:], 'ccc_ars', 'ccc', save_loc + save_name + '_')
+    viz(sagr_val[:], 'sagr_val', 'sagr', save_loc + save_name + '_')
+    viz(sagr_ars[:], 'sagr_ars', 'sagr', save_loc + save_name + '_')
+    
+    best_perf = loss.index(min(loss))
+    worst_perf = loss.index(max(loss))
+    output = 'Epoch {} | L2 distance: {} | RMSE_Val: {} | RMSE_Ars: {} |' \
+            'P_Val: {} | P_Ars: {} | C_Val: {} | C_Ars: {} | S_Val: {} | S_Ars: {}'
+            
+    print('Best performance ' + output.format(best_perf, loss[best_perf], 
+                                              rmse_val[best_perf], rmse_ars[best_perf],
+                                              corr_val[best_perf], corr_ars[best_perf],
+                                              ccc_val[best_perf], ccc_ars[best_perf], 
+                                              sagr_val[best_perf], sagr_ars[best_perf]))
+    
+    print('Worst performance ' + output.format(worst_perf, loss[worst_perf], 
+                                              rmse_val[worst_perf], rmse_ars[worst_perf],
+                                              corr_val[worst_perf], corr_ars[worst_perf],
+                                              ccc_val[worst_perf], ccc_ars[worst_perf], 
+                                              sagr_val[worst_perf], sagr_ars[worst_perf]))
     
 
 def viz(arr, title, yaxis, path):
     plt.figure(figsize=(15,7))
-    plt.plot(arr)
+    plt.plot(arr, np.arange(1, len(arr), 1), 'o-')
+    
+    # X tick
+    plt.xticks(np.arange(1, len(arr), 1))
+    
+    # Title and axis label
     plt.ylabel(yaxis)
     plt.xlabel('Epoch')
     plt.title(title)
+    
+    # Save configuration
+    plt.tight_layout()
     plt.grid()
-    plt.savefig(path+title+'.png', dpi=500)
-    plt.show()
+    plt.savefig(path+title+'.jpg', dpi=500)
     
 
-read_output('./PyTorch_reg/log/resnet50_30_test.txt')
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--read_path", help="test log files")
+    parser.add_argument("--save_loc", help="log file viz save location")
+    parser.add_argument("--save_name", help="log file viz save name")
+    args = parser.parse_args()
+    read_output(args.read_path, args.save_loc, args.save_name)
 

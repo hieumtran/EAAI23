@@ -33,8 +33,5 @@ PyTorch_reg/design/simplenet/
 # Ignore pycache
 __pycache__/
 
-# Ignore log files
-*.txt
-
 # Ignore .vscode
 .vscode/

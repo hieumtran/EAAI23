@@ -57,7 +57,7 @@ def viz(arr, title, yaxis, path):
     plt.plot(np.arange(1, len(arr)+1, 1), arr, 'o-')
     
     # X tick
-    plt.xticks(np.arange(1, len(arr)+1, 1))
+    plt.xticks(np.arange(1, len(arr)+1, 30))
     
     # Title and axis label
     plt.ylabel(yaxis)

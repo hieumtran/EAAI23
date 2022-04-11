@@ -65,9 +65,9 @@ def main():
                         loss_func=loss_func, model=simple_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_200.pt')
+    # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_200.pt')
     # proceed.test(test_loader)
-    proceed.fit(train_loader, val_loader)
+    # proceed.fit(train_loader, val_loader)
     for i in range(1, 250):
         proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
         proceed.test(test_loader)

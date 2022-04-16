@@ -1,101 +1,77 @@
+import numpy as np
+from dataloader import Dataloader
+from procedure import procedure
 import torch
-import matplotlib.pyplot as plt
-from AlexNet_Model import AlexNet_Reg, AlexNet_Class
-from TrainingProcedure_Reg import Training_Procedure
-from DataLoader import Dataloader
-from datetime import datetime
-from lossFunc import L2_dist
+import torch.nn as nn
+# from design.vgg_simple import VGG_simple # VGG-16
+# from design.sp_trans import sp_trans # Spatial Transformer 
+# from design.resnet import ResNet
+from AlexNet_Model import AlexNet_Reg
+from loss_function import L2_dist
 
 
-def viz_res(root, dest_folder, trainLoss, val_trainAcc, ars_trainAcc, valLoss, val_valAcc, ars_valAcc, savename=None):
-    plt.figure(figsize=(15, 10))
-
-    plt.subplot(1, 2, 1)  # row 1, col 2 index 1
-    plt.plot(trainLoss, color='#17bccf', label='Train')
-    plt.plot(valLoss, color='#ff7f44', label='Val')
-    plt.title("Loss Func")
-    plt.xlabel('Epochs')
-    plt.grid()
-    plt.legend()
-
-    plt.subplot(1, 2, 2)  # index 2
-    plt.plot(val_trainAcc, color='#17bccf', label='Valence Train')
-    plt.plot(ars_trainAcc, color='#20bccf', label='Arousal Train')
-    plt.plot(val_valAcc, color='#ff7f30', label='Valence Val')
-    plt.plot(ars_valAcc, color='#ff7f44', label='Valence Val')
-    plt.title('Accuracy')
-    plt.xlabel('Epochs')
-    plt.grid()
-    plt.legend()
-
-    plt.tight_layout()
-    if savename != None:
-        plt.savefig(
-            root + dest_folder + savename + '.jpg', dpi=500)
-    plt.show()
-
-
-def main():
-
-    root = "../"
-    result = "AlexNet_torch_20220314"
-
-    batch_size = 256
-    shuffle = True
-    num_workers = 0
-    regression = True
-
+def load_data(root, batch_size, num_workers, subset, shuffle, validation):
+    # Data loading
     train_image_dir = "data/train_set/images/"
-    train_reg_frame = "train_reg.csv"
-    train_class_frame = "train_class.csv"
+    train_reg_frame = "train_subset_reg.csv"
 
     val_image_dir = "data/train_set/images/"
     val_reg_frame = "val_reg.csv"
-    val_class_frame = "val_class.csv"
 
     test_image_dir = "data/val_set/images/"
     test_reg_frame = "test_reg.csv"
-    test_class_frame = "test_class.csv"
 
-    model = AlexNet_Reg()
+    train = Dataloader(root=root, image_dir=train_image_dir, label_frame=train_reg_frame, subset=subset,
+                       regression=True).load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    val = Dataloader(root=root, image_dir=val_image_dir, label_frame=val_reg_frame, subset=subset,
+                     regression=True).load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    test = Dataloader(root=root, image_dir=test_image_dir, label_frame=test_reg_frame, subset=subset,
+                      regression=True).load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
-    train_classLoader = Dataloader(root, train_image_dir, train_class_frame).load_batch(
-        batch_size, shuffle, num_workers)
-    train_regLoader = Dataloader(root, train_image_dir, train_reg_frame, regression=regression).load_batch(
-        batch_size, shuffle, num_workers)
-
-    val_classLoader = Dataloader(root, val_image_dir, val_class_frame).load_batch(
-        batch_size, shuffle, num_workers)
-    val_regLoader = Dataloader(root, val_image_dir, val_reg_frame, regression=regression).load_batch(
-        batch_size, shuffle, num_workers)
-
-    test_classLoader = Dataloader(root, test_image_dir, test_class_frame).load_batch(
-        batch_size, shuffle, num_workers)
-    test_regLoader = Dataloader(root, test_image_dir, test_reg_frame, regression=regression).load_batch(
-        batch_size, shuffle, num_workers)
-
-    lr = 0.001
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
-    loss = L2_dist
-
-    training_class = Training_Procedure(
-        model=model,
-        train_dataloader=train_regLoader,
-        val_dataloader=val_regLoader,
-        test_dataloader=test_regLoader,
-        batch_size=batch_size,
-        epochs=20,
-        optimizer=optimizer,
-        loss_func=loss,
-        shuffle=True, num_workers=0, lr=lr, savename="output/reg_20220314/"+result, regression=regression
-    )
-
-    trainLoss, val_trainRMSE, ars_trainRMSE, valLoss, val_valRMSE, ars_valRMSE = training_class.process()
-    viz_res(root, "AlexNet_pytorch/output/", trainLoss, val_trainRMSE, ars_trainRMSE, valLoss, val_valRMSE, ars_valRMSE, result)
+    if validation == False: val = None
+    return train, val, test
 
 
-print("Start training:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-main()
-print("Finish training:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+def main():
+    # Data parameters
+    batch_size = 16
+    num_workers = 0
+    subset = None
+    # subset = 1000
+    root_dir = './'
+    shuffle = False
+    train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size, subset=subset, 
+                                                      num_workers=num_workers, shuffle=shuffle, validation=False)
 
-# print(torch.cuda.is_available())
+    # Model parameters
+    start_epoch = 200
+    end_epoch = 250
+    loss_func = L2_dist
+    save_path = './AlexNet_pytorch/alexnet_res/alexnet_'
+    save_fig = './AlexNet_pytorch/figure/alexnet_loss'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    # Init model & Optimizer
+    # res_net = ResNet(res_learning=[3, 4, 23, 3]).to(device).float()
+    # res_net = ResNet(res_learning=[3, 4, 6, 3]).to(device).float()
+    # optimizer = torch.optim.SGD(res_net.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0001)
+
+    simple_net = AlexNet_Reg().to(device)
+    optimizer = torch.optim.SGD(simple_net.parameters(), lr=0.0001, momentum=0.9, weight_decay=0.0001)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3)
+
+    # procedure init
+    proceed = procedure(optimizer=optimizer, scheduler=scheduler,
+                        loss_func=loss_func, model=simple_net,
+                        start_epoch=start_epoch, end_epoch=end_epoch, device=device,
+                        save_path=save_path, save_fig=save_fig)
+    # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_200.pt')
+    # proceed.test(test_loader)
+    proceed.fit(train_loader, val_loader)
+    # for i in range(1, 250):
+    #     proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
+    #     proceed.test(test_loader)
+    proceed.visualize('./AlexNet_pytorch/figure/alexnet_loss.jpg')
+        
+if __name__ == '__main__':
+    main()

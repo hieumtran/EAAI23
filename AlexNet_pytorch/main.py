@@ -34,18 +34,19 @@ def load_data(root, batch_size, num_workers, subset, shuffle, validation):
 
 def main():
     # Data parameters
-    batch_size = 16
+    batch_size = 8
     num_workers = 0
     subset = None
     # subset = 1000
+    # root_dir = '../'
     root_dir = './'
     shuffle = False
     train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size, subset=subset, 
                                                       num_workers=num_workers, shuffle=shuffle, validation=False)
 
     # Model parameters
-    start_epoch = 200
-    end_epoch = 250
+    start_epoch = 1
+    end_epoch = 100
     loss_func = L2_dist
     save_path = './AlexNet_pytorch/alexnet_res/alexnet_'
     save_fig = './AlexNet_pytorch/figure/alexnet_loss'
@@ -65,13 +66,13 @@ def main():
                         loss_func=loss_func, model=simple_net,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_200.pt')
-    # proceed.test(test_loader)
-    proceed.fit(train_loader, val_loader)
+    proceed.load_model('./AlexNet_pytorch/alexnet_res/alexnet_100.pt')
+    proceed.test(test_loader)
+    # proceed.fit(train_loader, val_loader)
     # for i in range(1, 250):
     #     proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
     #     proceed.test(test_loader)
-    proceed.visualize('./AlexNet_pytorch/figure/alexnet_loss.jpg')
+    # proceed.visualize('./AlexNet_pytorch/figure/alexnet_loss.jpg')
         
 if __name__ == '__main__':
     main()

@@ -12,7 +12,7 @@ class simpleNet(nn.Module):
 
     def forward(self, x):
         out = self.basic_block(x)
-        out = F.max_pool2d(out, kernel_size=out.size()[2:]) 
+        # out = F.max_pool2d(out, kernel_size=out.size()[2:]) 
         out = self.dprt(out)
 
         out = out.view(out.size(0), -1)

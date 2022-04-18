@@ -47,8 +47,8 @@ def main():
     start_epoch = 0
     end_epoch = 100
     loss_func = L2_dist
-    save_path = './PyTorch_reg/design/simplenet/simplenet_last13_'
-    save_fig = './PyTorch_reg/figure/simplenet_last13_loss'
+    save_path = './PyTorch_reg/design/simplenet/simplenet_last8_'
+    save_fig = './PyTorch_reg/figure/simplenet_last8_loss'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # Init model & Optimizer

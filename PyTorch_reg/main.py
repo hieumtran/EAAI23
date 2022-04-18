@@ -34,7 +34,7 @@ def load_data(root, batch_size, num_workers, subset, shuffle, validation):
 
 def main():
     # Data parameters
-    batch_size = 16
+    batch_size = 8
     num_workers = 0
     subset = None
     # subset = 1000

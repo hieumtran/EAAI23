@@ -14,7 +14,7 @@ class simpleNet(nn.Module):
         out = self.basic_block(x)
         # out = F.max_pool2d(out, kernel_size=out.size()[2:]) 
         out = self.dprt(out)
-
+        
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
@@ -80,7 +80,7 @@ class simpleNet(nn.Module):
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2), dilation=(1,1), ceil_mode=False),
             nn.Dropout(0.1),
 
-            nn.Conv2d(2048, 256, kernel_size=(8,8), stride=(1,1), padding=(1,1)),            
+            nn.Conv2d(2048, 256, kernel_size=(9,9), stride=(1,1), padding=(1,1)),            
         )
 
 

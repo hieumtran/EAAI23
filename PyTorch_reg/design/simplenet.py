@@ -7,7 +7,7 @@ class simpleNet(nn.Module):
         super(simpleNet, self).__init__()
 
         self.basic_simple_net(input_dim)
-        self.linear = nn.Linear(2048, output_dim)
+        self.linear = nn.Linear(256, output_dim)
         self.dprt = nn.Dropout(0.1)
 
     def forward(self, x):
@@ -80,7 +80,7 @@ class simpleNet(nn.Module):
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2), dilation=(1,1), ceil_mode=False),
             nn.Dropout(0.1),
 
-            nn.Conv2d(2048, 2048, kernel_size=(9,9), stride=(1,1), padding=(1,1)),            
+            nn.Conv2d(2048, 256, kernel_size=(9,9), stride=(1,1), padding=(1,1)),            
         )
 
 

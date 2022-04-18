@@ -34,7 +34,7 @@ def load_data(root, batch_size, num_workers, subset, shuffle, validation):
 
 def main():
     # Data parameters
-    batch_size = 16
+    batch_size = 8
     num_workers = 0
     subset = None
     # subset = 1000
@@ -44,11 +44,11 @@ def main():
                                                       num_workers=num_workers, shuffle=shuffle, validation=False)
 
     # Model parameters
-    start_epoch = 200
-    end_epoch = 250
+    start_epoch = 0
+    end_epoch = 100
     loss_func = L2_dist
-    save_path = './PyTorch_reg/design/simplenet/simplenet_'
-    save_fig = './PyTorch_reg/figure/simplenet_loss'
+    save_path = './PyTorch_reg/design/simplenet/simplenet_last13_'
+    save_fig = './PyTorch_reg/figure/simplenet_last13_loss'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # Init model & Optimizer
@@ -67,11 +67,11 @@ def main():
                         save_path=save_path, save_fig=save_fig)
     # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_200.pt')
     # proceed.test(test_loader)
-    # proceed.fit(train_loader, val_loader)
-    for i in range(1, 250):
-        proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
-        proceed.test(test_loader)
-    proceed.visualize('./PyTorch_reg/figure/simplenet_loss.jpg')
+    proceed.fit(train_loader, val_loader)
+    # for i in range(1, 250):
+        # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
+        # proceed.test(test_loader)
+    # proceed.visualize('./PyTorch_reg/figure/simplenet_loss.jpg')
         
 if __name__ == '__main__':
     main()

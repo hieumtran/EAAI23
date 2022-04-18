@@ -80,7 +80,7 @@ class simpleNet(nn.Module):
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2), dilation=(1,1), ceil_mode=False),
             nn.Dropout(0.1),
 
-            nn.Conv2d(2048, 256, kernel_size=(3,3), stride=(1,1), padding=(1,1)),            
+            nn.Conv2d(2048, 256, kernel_size=(7,7), stride=(1,1), padding=(1,1)),            
         )
 
 

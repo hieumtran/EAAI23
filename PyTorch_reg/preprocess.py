@@ -14,16 +14,21 @@ val_class = pd.read_csv('./data/val_class.csv', header=None)
 val = pd.merge(val_class, val_reg, on=0).rename(columns={0: 'image', '1_x': 'class', '1_y': 'val', 2: 'ars'})
 
 train = pd.concat([train, val]).reset_index(drop=True)
-downsample = min(train['class'].value_counts())
+# downsample = min(train['class'].value_counts())
+downsample = 10000
 
 num_class = set(train['class'])
 
 subset = []
 for i in num_class:
-    subset.append(train.loc[train['class'] == i][:downsample])
+    subset_class = train.loc[train['class'] == i]
+    if len(subset_class) < downsample
+    subset.append(train.loc[train['class'] == i][:10000])
+
 
 subset = pd.concat(subset).sample(frac=1).reset_index(drop=True)
-subset_reg = subset.loc[:, ['image', 'val', 'ars']]
-subset_class = subset.loc[:, ['image', 'class']]
-subset_reg.to_csv('./data/train_subset_reg.csv', header=None, index=False)
-subset_class.to_csv('./data/train_subset_class.csv', header=None, index=False)
+print(subset)
+# subset_reg = subset.loc[:, ['image', 'val', 'ars']]
+# subset_class = subset.loc[:, ['image', 'class']]
+# subset_reg.to_csv('./data/train_subset_reg.csv', header=None, index=False)
+# subset_class.to_csv('./data/train_subset_class.csv', header=None, index=False)

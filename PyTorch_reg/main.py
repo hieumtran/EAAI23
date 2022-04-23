@@ -44,8 +44,8 @@ def main():
                                                       num_workers=num_workers, shuffle=shuffle, validation=False)
 
     # Model parameters
-    start_epoch = 1
-    end_epoch = 100
+    start_epoch = 101
+    end_epoch = 250
     loss_func = L2_dist
     save_path = './PyTorch_reg/design/simplenet/simplenet_last8_'
     save_fig = './PyTorch_reg/figure/simplenet_last8_loss'
@@ -66,12 +66,13 @@ def main():
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
     # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_200.pt')
+    # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_last8_100.pt')
     # proceed.test(test_loader)
-    proceed.fit(train_loader, val_loader)
-    # for i in range(1, 250):
-        # proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_' + str(i) + '.pt')
-        # proceed.test(test_loader)
-    # proceed.visualize('./PyTorch_reg/figure/simplenet_loss.jpg')
+    # proceed.fit(train_loader, val_loader)
+    for i in range(1, 251):
+        proceed.load_model('./PyTorch_reg/design/simplenet/simplenet_last8_' + str(i) + '.pt')
+        proceed.test(test_loader)
+    proceed.visualize('./PyTorch_reg/figure/simplenet_last9_loss.jpg')
         
 if __name__ == '__main__':
     main()

@@ -51,7 +51,7 @@ def main():
     start_epoch = 0
     end_epoch = 100
     loss_func = L2_dist
-    save_path = './PyTorch_reg/design/InvNet/InvNet_aug_'
+    save_path = './PyTorch_reg/design/InvNet/InvNet101_aug_'
     save_fig = './PyTorch_reg/figure/InvNet_aug'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -62,7 +62,7 @@ def main():
 
     # simple_net = simpleNet(3, 2).to(device)
     # mydesign = MyDesign(3, 2).to(device)
-    model = InvNet(3, [64, 128, 256, 512], [2, 2, 3, 2], 0.5).to('cuda')
+    model = InvNet(3, [64, 128, 256, 512], [3, 3, 10, 3], 0.5).to('cuda')
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('Total number of parameters: ', pytorch_total_params)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.0001, momentum=0.9, weight_decay=0.0001)
@@ -75,12 +75,12 @@ def main():
                         save_path=save_path, save_fig=save_fig)
     # proceed.load_model('./PyTorch_reg/design/InvNet/InvNet_87.pt')
     # proceed.test(test_loader)
-    # proceed.fit(train_loader, test_loader)
-    for i in range(0, 101):
-        proceed.load_model('./PyTorch_reg/design/InvNet/InvNet_aug_' + str(i) + '.pt')
-        proceed.test(test_loader)
+    proceed.fit(train_loader, val_loader)
+    # for i in range(0, 101):
+        # proceed.load_model('./PyTorch_reg/design/InvNet/InvNet_aug_' + str(i) + '.pt')
+        # proceed.test(test_loader)
     # # proceed.load_model('./PyTorch_reg/design/MyDesign/MyDesign_84.pt')
-    proceed.visualize('./PyTorch_reg/figure/InvNet_aug_loss.jpg')
+    # proceed.visualize('./PyTorch_reg/figure/InvNet_aug_loss.jpg')
         
 if __name__ == '__main__':
     main()

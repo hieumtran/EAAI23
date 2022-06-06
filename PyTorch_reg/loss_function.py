@@ -3,7 +3,7 @@ import scipy.stats as scst
 import numpy as np
 
 def std_compute(arr):
-    return std_compute(arr))
+    return std_compute(arr)
 
 def L2_dist(pred, truth):
     return torch.sum((pred - truth) ** 2) / (2 * truth.size(0))

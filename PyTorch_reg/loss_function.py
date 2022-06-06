@@ -2,6 +2,9 @@ import torch
 import scipy.stats as scst
 import numpy as np
 
+def std_compute(arr):
+    return std_compute(arr)
+
 def L2_dist(pred, truth):
     return torch.sum((pred - truth) ** 2) / (2 * truth.size(0))
 
@@ -12,16 +15,23 @@ def rmse(pred, truth):
 
 
 def pear(pred, truth):
-    return scst.pearsonr(pred[:, 0], truth[:, 0])[0], scst.pearsonr(pred[:, 1], truth[:, 1])[0]
-
+    # Sample CC
+    # return scst.pearsonr(pred[:, 0], truth[:, 0])[0], scst.pearsonr(pred[:, 1], truth[:, 1])[0]
+    # Population CC 
+    val_cov = np.cov(pred[:, 0], truth[:, 0])[0,1]
+    pop_val_rho = val_cov / (std_compute(pred[:, 0])*std_compute(truth[:, 0]))
+    ars_cov = np.cov(pred[:, 1], truth[:, 1])[0,1]
+    pop_ars_rho = ars_cov / (std_compute(pred[:, 1])*std_compute(truth[:, 1]))
+    return pop_val_rho, pop_ars_rho
+    
 
 def ccc(pred, truth):
     # mean
     (val_mean_pred, val_mean_truth) = (torch.mean(pred[:, 0]), torch.mean(truth[:, 0]))
     (ars_mean_pred, ars_mean_truth) = (torch.mean(pred[:, 1]), torch.mean(truth[:, 1]))
     # std
-    (val_std_pred, val_std_truth) = (torch.sqrt(torch.var(pred[:, 0])), torch.sqrt(torch.var(truth[:, 0])))
-    (ars_std_pred, ars_std_truth) = (torch.sqrt(torch.var(pred[:, 1])), torch.sqrt(torch.var(truth[:, 1])))
+    (val_std_pred, val_std_truth) = (std_compute(pred[:, 0]), std_compute(truth[:, 0]))
+    (ars_std_pred, ars_std_truth) = (std_compute(pred[:, 1]), std_compute(truth[:, 1]))
     # pearson correlation
     val_pear, ars_pear = pear(pred, truth)
     # computation

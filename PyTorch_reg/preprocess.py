@@ -93,7 +93,7 @@ def viz(subset, colormap):
 
     plt.tight_layout()
     plt.axis('off') #hide axes and borders
-    plt.legend(fontsize='xx-large')
+    plt.legend(fontsize='25')
     plt.savefig('./PyTorch_reg/figure/russell_affectnet.jpg', dpi=500)
     
     

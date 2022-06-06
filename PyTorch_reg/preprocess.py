@@ -68,25 +68,29 @@ def save_all_train():
     # Save to csv
     train.to_csv('./data/train.csv', index=False)
 
+def viz(train):
+
 if __name__ == "__main__":
     # save_all_train()
 
     # Init train
     train = pd.read_csv('./data/train.csv')
 
-    # Apply downsampling
-    downsample = 20000
-    subset = downsample_func(train, downsample)
 
-    # Augmentation
-    HF_4 = augmentation(subset, 4, 'HF')
-    CJ_5 = augmentation(subset, 5, 'CJ')
-    HF_5 = augmentation(subset, 5, 'HF')
-    CJ_7 = augmentation(subset, 7, 'CJ')
-    HF_7 = augmentation(subset, 7, 'HF')
-    # Concat all augmentation
-    subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
-    # Split train
-    split_train(subset, 1, 'train_CJ_HF_20000_', './data/')
+
+    # # Apply downsampling
+    # downsample = 20000
+    # subset = downsample_func(train, downsample)
+
+    # # Augmentation
+    # HF_4 = augmentation(subset, 4, 'HF')
+    # CJ_5 = augmentation(subset, 5, 'CJ')
+    # HF_5 = augmentation(subset, 5, 'HF')
+    # CJ_7 = augmentation(subset, 7, 'CJ')
+    # HF_7 = augmentation(subset, 7, 'HF')
+    # # Concat all augmentation
+    # subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
+    # # Split train
+    # split_train(subset, 1, 'train_CJ_HF_20000_', './data/')
     
 

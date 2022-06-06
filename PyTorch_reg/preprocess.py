@@ -1,8 +1,10 @@
 import pandas as pd
 import torchvision.transforms as transforms
 from PIL import Image
+import numpy as np
 import matplotlib.pyplot as plt
 import time
+
 
 def augmentation(subset, emotion, method):
     assert method in ['GB', 'HF', 'CJ']
@@ -68,16 +70,44 @@ def save_all_train():
     # Save to csv
     train.to_csv('./data/train.csv', index=False)
 
-def viz(train):
+def viz(subset, colormap):
+    emotions = [i for i in range(8)]
+    labels = ['Neutral', 'Happy', 'Sad', 'Surprise', 'Fear', 'Disgust', 'Anger', 'Contempt']
+    cmap = plt.get_cmap(colormap)
+    colors = cmap(np.linspace(0, 1, len(emotions)))
+    plt.figure(figsize=(15,15))
+
+    for i in range(len(emotions)):
+        emotion_subset = subset.loc[subset['class'] == emotions[i]]
+        plt.scatter(emotion_subset['val'], emotion_subset['ars'], color=colors[i], label=labels[i], zorder=2)
+    
+    # Valence and Arousal Axis
+    plt.axhline(y=0, xmin=0, xmax=0.93, linewidth=8, color='black', zorder=1)
+    plt.axvline(x=0, ymin=0, ymax=0.93, linewidth=8, color='black', zorder=1)
+    plt.arrow(1.1, 0, 0.01, 0, width=0.013, color='black')
+    plt.arrow(0, 1.1, 0, 0, width=0.013, color='black')
+
+    # Text for annotation purpose
+    plt.text(0.1, 1.1, 'Valence', fontsize='25', fontweight='bold')
+    plt.text(1.1, -0.1, 'Arousal', fontsize='25', fontweight='bold')
+
+    plt.tight_layout()
+    plt.axis('off') #hide axes and borders
+    plt.legend(fontsize='xx-large')
+    plt.savefig('./PyTorch_reg/figure/russell_affectnet.jpg', dpi=500)
+    
+    
 
 if __name__ == "__main__":
     # save_all_train()
 
     # Init train
     train = pd.read_csv('./data/train.csv')
+    # Plot figure
+    viz(train, 'Dark2')
 
 
-
+    # Augment + Downsampling
     # # Apply downsampling
     # downsample = 20000
     # subset = downsample_func(train, downsample)

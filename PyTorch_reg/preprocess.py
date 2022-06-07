@@ -41,12 +41,11 @@ def downsample_func(subset, downsample):
         subset_class = train.loc[train['class'] == i]
         subset.append(subset_class[:downsample])
     subset = pd.concat(subset)
-    # print('Number of each classes:')
-    # print(subset['class'].value_counts())
     return subset
 
 def split_train(subset, seed, save_name, save_loc):
     subset = subset.sample(frac=1, random_state=seed).reset_index(drop=True)
+    subset.to_csv(save_loc+save_name+'.csv', header=None, index=False)
     # Splitting to regression and classification
     subset_reg = subset.loc[:, ['image', 'val', 'ars']]
     subset_class = subset.loc[:, ['image', 'class']]
@@ -102,17 +101,17 @@ if __name__ == "__main__":
     # save_all_train()
 
     # Init train
-    train = pd.read_csv('./data/train.csv')
-    # Plot figure
-    viz(train, 'Dark2')
+    # train = pd.read_csv('./data/train.csv')
+    # # Plot figure
+    # # viz(train, 'Dark2')
 
 
-    # Augment + Downsampling
-    # # Apply downsampling
+    # # Augment + Downsampling
+    # # # Apply downsampling
     # downsample = 20000
     # subset = downsample_func(train, downsample)
 
-    # # Augmentation
+    # # # Augmentation
     # HF_4 = augmentation(subset, 4, 'HF')
     # CJ_5 = augmentation(subset, 5, 'CJ')
     # HF_5 = augmentation(subset, 5, 'HF')
@@ -121,6 +120,6 @@ if __name__ == "__main__":
     # # Concat all augmentation
     # subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
     # # Split train
-    # split_train(subset, 1, 'train_CJ_HF_20000_', './data/')
-    
-
+    # split_train(subset, 1, 'train_CJ_HF_20000', './data/')
+    tmp = pd.read_csv('./data/train_CJ_HF_20000.csv')
+    print(tmp)

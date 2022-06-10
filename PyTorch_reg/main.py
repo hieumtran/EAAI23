@@ -41,11 +41,11 @@ def main():
     # Model parameters
     start_epoch = 0
     end_epoch = 100
-    save_path = './PyTorch_reg/design/InvNet/InvNet50_aug_'
+    save_path = './PyTorch_reg/design/InvNet/InvNet30_aug_'
     save_fig = './PyTorch_reg/figure/InvNet_aug'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    model = InvNet(3, [64, 128, 256, 512], [2, 2, 3, 2], 0.5).to('cuda')
+    model = InvNet(3, [64, 128, 256, 512], [1, 1, 1, 1], 0.5).to('cuda')
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
     print('Total number of parameters: ', pytorch_total_params)

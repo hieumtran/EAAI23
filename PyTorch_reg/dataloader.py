@@ -41,17 +41,17 @@ class Dataset(Dataset):
         if self.mode == 'reg':
             labels = self.label_frame.iloc[idx, 1:]
             labels = np.array([labels]).astype('float').reshape(-1, 2)
-            return images, labels
+            
         elif self.mode == 'class':
             labels = self.label_frame.iloc[idx, 1]
             labels = (np.array(labels)).astype("int")
-            return images, labels
-        elif self.mode == 'both':
-            labels_class = self.label_frame.iloc[idx, 1]
-            labels_class = (np.array(labels_class)).astype("int")
-            labels_reg = self.label_frame.iloc[idx, 2:]
-            labels_reg = np.array([labels_reg]).astype('float').reshape(-1, 2)
-            return images, labels_reg, labels_class
+
+        # elif self.mode == 'both':
+        #     labels_class = self.label_frame.iloc[idx, 1]
+        #     labels_class = (np.array(labels_class)).astype("int")
+        #     labels_reg = self.label_frame.iloc[idx, 2:]
+        #     labels_reg = np.array([labels_reg]).astype('float').reshape(-1, 2)
+        #     return images, labels_reg, labels_class
 
         return images, labels
 

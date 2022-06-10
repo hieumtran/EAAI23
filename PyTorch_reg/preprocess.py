@@ -1,8 +1,10 @@
 import pandas as pd
 import torchvision.transforms as transforms
 from PIL import Image
+import numpy as np
 import matplotlib.pyplot as plt
 import time
+
 
 def augmentation(subset, emotion, method):
     assert method in ['GB', 'HF', 'CJ']
@@ -39,12 +41,11 @@ def downsample_func(subset, downsample):
         subset_class = train.loc[train['class'] == i]
         subset.append(subset_class[:downsample])
     subset = pd.concat(subset)
-    # print('Number of each classes:')
-    # print(subset['class'].value_counts())
     return subset
 
 def split_train(subset, seed, save_name, save_loc):
     subset = subset.sample(frac=1, random_state=seed).reset_index(drop=True)
+    subset.to_csv(save_loc+save_name+'.csv', header=None, index=False)
     # Splitting to regression and classification
     subset_reg = subset.loc[:, ['image', 'val', 'ars']]
     subset_class = subset.loc[:, ['image', 'class']]
@@ -68,25 +69,57 @@ def save_all_train():
     # Save to csv
     train.to_csv('./data/train.csv', index=False)
 
+def viz(subset, colormap):
+    emotions = [i for i in range(8)]
+    labels = ['Neutral', 'Happy', 'Sad', 'Surprise', 'Fear', 'Disgust', 'Anger', 'Contempt']
+    cmap = plt.get_cmap(colormap)
+    colors = cmap(np.linspace(0, 1, len(emotions)))
+    plt.figure(figsize=(15,15))
+
+    for i in range(len(emotions)):
+        emotion_subset = subset.loc[subset['class'] == emotions[i]]
+        plt.scatter(emotion_subset['val'], emotion_subset['ars'], color=colors[i], label=labels[i], zorder=2)
+    
+    # Valence and Arousal Axis
+    plt.axhline(y=0, xmin=0, xmax=0.93, linewidth=8, color='black', zorder=1)
+    plt.axvline(x=0, ymin=0, ymax=0.93, linewidth=8, color='black', zorder=1)
+    plt.arrow(1.1, 0, 0.01, 0, width=0.013, color='black')
+    plt.arrow(0, 1.1, 0, 0, width=0.013, color='black')
+
+    # Text for annotation purpose
+    plt.text(0.1, 1.1, 'Valence', fontsize='25', fontweight='bold')
+    plt.text(1.1, -0.1, 'Arousal', fontsize='25', fontweight='bold')
+
+    plt.tight_layout()
+    plt.axis('off') #hide axes and borders
+    plt.legend(markerscale=3., fontsize='25')
+    plt.savefig('./PyTorch_reg/figure/russell_affectnet.jpg', dpi=500)
+    
+    
+
 if __name__ == "__main__":
     # save_all_train()
 
     # Init train
-    train = pd.read_csv('./data/train.csv')
+    # train = pd.read_csv('./data/train.csv')
+    # # Plot figure
+    # # viz(train, 'Dark2')
 
-    # Apply downsampling
-    downsample = 20000
-    subset = downsample_func(train, downsample)
 
-    # Augmentation
-    HF_4 = augmentation(subset, 4, 'HF')
-    CJ_5 = augmentation(subset, 5, 'CJ')
-    HF_5 = augmentation(subset, 5, 'HF')
-    CJ_7 = augmentation(subset, 7, 'CJ')
-    HF_7 = augmentation(subset, 7, 'HF')
-    # Concat all augmentation
-    subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
-    # Split train
-    split_train(subset, 1, 'train_CJ_HF_20000_', './data/')
-    
+    # # Augment + Downsampling
+    # # # Apply downsampling
+    # downsample = 20000
+    # subset = downsample_func(train, downsample)
 
+    # # # Augmentation
+    # HF_4 = augmentation(subset, 4, 'HF')
+    # CJ_5 = augmentation(subset, 5, 'CJ')
+    # HF_5 = augmentation(subset, 5, 'HF')
+    # CJ_7 = augmentation(subset, 7, 'CJ')
+    # HF_7 = augmentation(subset, 7, 'HF')
+    # # Concat all augmentation
+    # subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
+    # # Split train
+    # split_train(subset, 1, 'train_CJ_HF_20000', './data/')
+    tmp = pd.read_csv('./data/train_CJ_HF_20000.csv')
+    print(tmp)

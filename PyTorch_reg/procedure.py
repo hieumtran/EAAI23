@@ -2,15 +2,15 @@ import torch
 import timeit
 import matplotlib.pyplot as plt
 import datetime
-from loss_function import rmse, pear, ccc, sagr
+from eval_metrics import rmse, pear, ccc, sagr
+from loss_function import L2_dist, entropy_loss
 
 class procedure:
     def __init__(self, optimizer, scheduler,
-                 loss_func, model, start_epoch, end_epoch,
+                 model, start_epoch, end_epoch,
                  save_path, save_fig, device):
         self.optimizer = optimizer  # optimizer
         self.scheduler = scheduler  # scheduler for optimizer
-        self.loss_func = loss_func  # loss function
         self.model = model  # model init
         self.device = device  # device
         self.start_epoch = start_epoch  # Beginning epoch
@@ -22,8 +22,8 @@ class procedure:
         self.scheduler = scheduler  # scheduler for optimizer
 
     def fit(self, train_loader, val_loader):
-        output_template = 'Epoch {} |' \
-                          'train: {:.8f} | val: {:.8f} |' \
+        output_template = 'Epoch {} | ' \
+                          'train: {:.8f} | val: {:.8f} | ' \
                           'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         for epoch in range(self.start_epoch, self.end_epoch + 1):
             epoch_start = timeit.default_timer()
@@ -61,11 +61,12 @@ class procedure:
         
         # Init computation variables
         samples, batch_cnt, sum_loss = (0, 0, 0)
-        for (batchX, batchY) in loader:
+        for (batchX, batchY_reg, batchY_class) in loader:
             start = timeit.default_timer()
-            (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float())  # Load data2
+            (batchX, batchY_reg, batchY_class) = (batchX.to(self.device).float(), batchY_reg.to(self.device).float(), 
+                                                    batchY_class.type(torch.LongTensor))  # Load data2
             if state == 'train': self.optimizer.zero_grad()  # Zero grad before mini-batch
-            pred, loss = self.loss_compute(batchX, batchY)  # Forward model
+            pred_reg, pred_class, loss = self.loss_compute(batchX, batchY_reg, batchY_class)  # Forward model
 
             # Optimizer step and Backpropagation
             if state == 'train':
@@ -73,29 +74,39 @@ class procedure:
                 self.optimizer.step()
 
             # Loss and samples size for evaluation
-            sum_loss += loss.item() * (2 * batchY.size(0))
-            samples += batchY.size(0)  # sample size
+            sum_loss += loss.item() * (2 * batchX.size(0))
+            samples += batchX.size(0)  # sample size
             batch_cnt += 1
             
             # Concat predict and truth value
             if state == 'test':
                 with torch.no_grad():
-                    predict.append(pred.to('cpu'))
-                    truth.append(batchY.to('cpu'))
+                    # Convert to cpu for easier computation
+                    # predict.append(pred.to('cpu')) # Unfixed
+                    # truth.append(batchY.to('cpu'))
+                    pass
 
             # Logging
             print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
         if state == 'train' or state == 'val': return sum_loss / (2 * samples)
         else: return sum_loss / (2 * samples), torch.concat(predict), torch.concat(truth)
 
-    def loss_compute(self, input, output):
+    def loss_compute(self, input, output_reg, output_class):
         input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
-        predict = self.model(input.float())
-        output = output.reshape(-1, 2)
-        loss = self.loss_func(predict.float(), output.float())
-        return predict, loss
+        pred_reg, pred_class = self.model(input.float())
+
+        output_reg = output_reg.reshape(-1, 2) # Reshape to Nx2
+        loss_reg = L2_dist(pred_reg.float(), output_reg.float())
+
+        output_class = output_class.reshape(-1) # Reshape to Nx1
+        loss_class = entropy_loss(pred_class, output_class.to(self.device))
+
+
+        batch_loss = loss_reg + loss_class
+        return pred_reg, pred_class, batch_loss
 
     def test(self, test_loader):
+        # Unfix test
         start = timeit.default_timer()
         output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | P_Val: {:.8f} | P_Ars: {:.8f} |' \
                             ' C_Val: {:.8f} | C_Ars: {:.8f} | S_Val: {:.8f} | S_Ars: {:.8f} |' 

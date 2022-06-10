@@ -32,11 +32,13 @@ class InvNet(nn.Module):
         self.invnet.append(nn.AvgPool2d(4, 4))
         self.invnet = nn.Sequential(*self.invnet)
 
-        self.linear = nn.Linear(dims[-1], 2)
+        self.linear_reg = nn.Linear(dims[-1], 2)
+        self.linear_class = nn.Linear(dims[-1], 8)
+        
 
     def forward(self, x):
         x = self.invnet(x)
         x = x.view(-1, self.dims[-1])
-        return self.linear(x)
+        return self.linear_reg(x), self.linear_class(x)
 
 

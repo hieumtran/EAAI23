@@ -19,7 +19,7 @@ class InvNet(nn.Module):
 
         # Model architecture
         for i in range(len(dims)):
-            for j in range(num_per_layers[i]):
+            for _ in range(num_per_layers[i]):
                 self.invnet.append(Block(dims[i], 7, 1, drp_rate))
                 self.invnet.append(LayerNorm(dims[i], eps=1e-6, data_format="channels_first"))
             if i == len(dims)-1:

@@ -41,7 +41,7 @@ def main():
     # Model parameters
     start_epoch = 0
     end_epoch = 100
-    save_path = './PyTorch_reg/design/InvNet/InvNet50_aug_'
+    save_path = './PyTorch_reg/design/InvNet/InvNet30_aug_'
     save_fig = './PyTorch_reg/figure/InvNet_aug'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

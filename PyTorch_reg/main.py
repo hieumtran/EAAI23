@@ -2,50 +2,56 @@ import numpy as np
 from dataloader import Dataloader
 from procedure import procedure
 import torch
-import torch.nn as nn
-from design.simplenet import simpleNet
-
 from design.InvNeXt.model import InvNet
+from torchvision import transforms
 
 
-def load_data(root, batch_size, num_workers, subset, shuffle, validation):
+def load_data(root, train_reg_frame, test_reg_frame, batch_size, num_workers, subset, shuffle):
     # Data loading
     train_image_dir = "data/train_set/images/"
     # train_reg_frame = "train_subset_resampling_10000_reg.csv"
     # train_reg_frame = "train_subset_reg.csv"
-    train_reg_frame = "train_CJ_HF_20000_reg.csv"
+    
 
     test_image_dir = "data/val_set/images/"
-    test_reg_frame = "test_reg.csv"
+    data_augment = transforms.RandomApply([transforms.GaussianBlur(kernel_size=(7, 13), sigma=(2, 5)),
+                                            transforms.RandomHorizontalFlip(p=0.5), 
+                                            transforms.ColorJitter(brightness=(0.5,1.5), contrast=(1), saturation=(0.5,1.5), hue=(-0.1,0.1)),
+                                            transforms.RandomErasing()
+                                            ], p=0.5)
+    transform = transforms.Compose([transforms.ToTensor(), data_augment,
+                                    transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956])])
 
-    train = Dataloader(root=root, image_dir=train_image_dir, label_frame=train_reg_frame, subset=subset,
+    train = Dataloader(root=root, image_dir=train_image_dir, label_frame=train_reg_frame, subset=subset, transform=transform,
                        mode='reg').load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-    test = Dataloader(root=root, image_dir=test_image_dir, label_frame=test_reg_frame, subset=subset,
+    test = Dataloader(root=root, image_dir=test_image_dir, label_frame=test_reg_frame, subset=subset, transform=transform,
                       mode='reg').load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
-    if validation == False: val = None
-    return train, val, test
+    return train, test
 
 
 def main():
     # Data parameters
-    batch_size = 8
+    batch_size = 32
     num_workers = 0
     subset = None
     # subset = 1000
     root_dir = './'
     shuffle = False
-    train_loader, val_loader, test_loader = load_data(root=root_dir, batch_size=batch_size, subset=subset, 
-                                                      num_workers=num_workers, shuffle=shuffle, validation=False)
+    train_reg_frame = "train_resample_25000_reg.csv"
+    test_reg_frame = "test_reg.csv"
+    train_loader, test_loader = load_data(root=root_dir, train_reg_frame=train_reg_frame, test_reg_frame=test_reg_frame,
+                                            batch_size=batch_size, subset=subset, 
+                                            num_workers=num_workers, shuffle=shuffle)
 
     # Model parameters
     start_epoch = 0
     end_epoch = 100
-    save_path = './PyTorch_reg/design/InvNet/InvNet30_aug_'
+    save_path = './PyTorch_reg/design/InvNet/InvNet17_'
     save_fig = './PyTorch_reg/figure/InvNet_aug'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    model = InvNet(3, [64, 128, 256, 512], [3, 3, 10, 3], 0.5).to('cuda')
+    model = InvNet(3, [64, 128, 256, 512], [1, 1, 1, 1], 0.5).to('cuda')
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
     print('Total number of parameters: ', pytorch_total_params)
@@ -56,14 +62,10 @@ def main():
     proceed = procedure(optimizer=optimizer, scheduler=scheduler, model=model,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    proceed.load_model('./PyTorch_reg/design/InvNet/InvNet101_aug_68.pt')
-    proceed.test(test_loader)
-    # proceed.fit(train_loader, test_loader)
-    # for i in range(0, 101):
-        # proceed.load_model('./PyTorch_reg/design/InvNet/InvNet50_aug_' + str(i) + '.pt')
-        # proceed.test(test_loader)
-    # # proceed.load_model('./PyTorch_reg/design/MyDesign/MyDesign_84.pt')
+    # proceed.load_model('./PyTorch_reg/design/InvNet/InvNet101_aug_68.pt')
+    # proceed.test(test_loader)
+    proceed.fit(train_loader, None)
+    # for i in range(0, 51):
+    #     proceed.load_model('./PyTorch_reg/design/InvNet/InvNet18_' + str(i) + '.pt')
+    #     proceed.test(test_loader)
     # proceed.visualize('./PyTorch_reg/figure/InvNet101_aug_loss.jpg')
-        
-if __name__ == '__main__':
-    main()

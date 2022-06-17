@@ -33,13 +33,15 @@ def augmentation(subset, emotion, method):
     return pd.DataFrame(aug_subset)
     
 
-def downsample_func(subset, downsample):
+def sample_func(subset, n_sample, seed):
     # Downsample method
     num_class = set(train['class'])
     subset = []
     for i in num_class:
         subset_class = train.loc[train['class'] == i]
-        subset.append(subset_class[:downsample])
+        if len(subset_class[:]) < n_sample:
+            subset_class = subset_class.sample(n=n_sample, replace=True, random_state=seed)
+        subset.append(subset_class[:n_sample])
     subset = pd.concat(subset)
     return subset
 
@@ -101,15 +103,17 @@ if __name__ == "__main__":
     # save_all_train()
 
     # Init train
-    # train = pd.read_csv('./data/train.csv')
+    train = pd.read_csv('./data/train.csv')
     # # Plot figure
     # # viz(train, 'Dark2')
 
 
     # # Augment + Downsampling
     # # # Apply downsampling
-    # downsample = 20000
-    # subset = downsample_func(train, downsample)
+    n_sample = 25000
+    seed = 1
+    subset = sample_func(train, n_sample, seed)
+    # print(subset['class'].value_counts())
 
     # # # Augmentation
     # HF_4 = augmentation(subset, 4, 'HF')
@@ -120,6 +124,6 @@ if __name__ == "__main__":
     # # Concat all augmentation
     # subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
     # # Split train
-    # split_train(subset, 1, 'train_CJ_HF_20000', './data/')
-    tmp = pd.read_csv('./data/train_CJ_HF_20000.csv')
+    split_train(subset, seed, 'train_resample_25000', './data/')
+    tmp = pd.read_csv('./data/train_resample_25000.csv')
     print(tmp)

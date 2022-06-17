@@ -5,6 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 import os
 from PIL import Image
 from torchvision import transforms
+import matplotlib.pyplot as plt
 
 
 # inherit the torch.utils.data.Dataset class
@@ -37,6 +38,9 @@ class Dataset(Dataset):
 
         if (self.transform):
             images = self.transform(images)
+        # plt.imshow(torch.reshape(images, (224, 224, 3)))
+        # # plt.imshow(np.transpose(images[0].cpu().detach().numpy(), (1, 2, 0)))
+        # plt.savefig('./tmp.jpg')
         
         if self.mode == 'reg':
             labels = self.label_frame.iloc[idx, 1:]
@@ -59,8 +63,7 @@ class Dataset(Dataset):
 class Dataloader():
     def __init__(
         self, root, image_dir, label_frame,
-        transform=transforms.Compose([transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956])]),
+        transform=None,
         mode=None, subset = None
     ):
         """

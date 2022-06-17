@@ -38,3 +38,6 @@ __pycache__/
 
 # Ignore weights
 *.pt
+
+# Ignore analysis and testing files
+*.png

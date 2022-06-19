@@ -32,13 +32,13 @@ def load_data(root, train_reg_frame, test_reg_frame, batch_size, num_workers, su
 
 def main():
     # Data parameters
-    batch_size = 128
+    batch_size = 64
     num_workers = 0
     subset = None
     # subset = 1000
     root_dir = './'
     shuffle = False
-    train_reg_frame = "train_resample_25000_reg.csv"
+    train_reg_frame = "train_CJ_HF_20000_reg.csv"
     test_reg_frame = "test_reg.csv"
     train_loader, test_loader = load_data(root=root_dir, train_reg_frame=train_reg_frame, test_reg_frame=test_reg_frame,
                                             batch_size=batch_size, subset=subset, 
@@ -77,7 +77,7 @@ def main():
                         save_path=save_path, save_fig=save_fig)
     # proceed.load_model('./PyTorch_reg/design/InvNet/InvNet101_aug_68.pt')
     # proceed.test(test_loader)
-    proceed.fit(train_loader, test_loader)
+    proceed.fit(train_loader, None)
     # for i in range(0, 51):
     #     proceed.load_model('./PyTorch_reg/design/InvNet/InvNet18_' + str(i) + '.pt')
     #     proceed.test(test_loader)

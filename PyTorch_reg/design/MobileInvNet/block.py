@@ -9,11 +9,11 @@ class Block(nn.Module):
         self.block = nn.Sequential(
             nn.Conv2d(input_dim, output_dim, kernel_size=1, stride=1), # Conv1
             nn.BatchNorm2d(output_dim, eps=1e-05, momentum=0.05, affine=True),
-            nn.Tanh(),
+            nn.ReLU6(),
 
             involution(output_dim, inv_kernel_size, inv_stride), # Involution layer
             nn.BatchNorm2d(output_dim, eps=1e-05, momentum=0.05, affine=True),
-            nn.Tanh(),
+            nn.ReLU6(),
 
             nn.Conv2d(output_dim, output_dim, kernel_size=1, stride=1), #C Conv2
             nn.BatchNorm2d(output_dim, eps=1e-05, momentum=0.05, affine=True)

@@ -15,8 +15,8 @@ class involution(nn.Module):
             in_channels=channels,
             out_channels=channels // reduction_ratio,
             kernel_size=1)
-        self.batch_norm1 = nn.BatchNorm2d(64, eps=1e-05, momentum=0.05, affine=True)
-        self.act_func1 = nn.ReLU(inplace=True)
+        self.batch_norm = nn.BatchNorm2d(channels // reduction_ratio, eps=1e-05, momentum=0.05, affine=True)
+        self.relu = nn.ReLU()
 
         # Convolution No.2
         self.conv2 = nn.Conv2d(
@@ -30,8 +30,8 @@ class involution(nn.Module):
         self.unfold = nn.Unfold(kernel_size, 1, (kernel_size-1)//2, 1)
 
     def forward(self, x):
-        if self.stride != 1: x = self.avgpool(x) 
-        weight = self.conv2(self.conv1(x))
+        if self.stride != 1: x = self.avgpool(x)
+        weight = self.conv2(self.relu(self.batch_norm(self.conv1(x))))
         b, c, h, w = weight.shape
         weight = weight.view(b, self.groups, self.kernel_size**2, h, w).unsqueeze(2)
         out = self.unfold(x).view(b, self.groups, self.group_channels, self.kernel_size**2, h, w)

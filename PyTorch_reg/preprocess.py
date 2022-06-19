@@ -33,14 +33,15 @@ def augmentation(subset, emotion, method):
     return pd.DataFrame(aug_subset)
     
 
-def sample_func(subset, n_sample, seed):
+def sample_func(subset, n_sample, resample, seed):
     # Downsample method
     num_class = set(train['class'])
     subset = []
     for i in num_class:
         subset_class = train.loc[train['class'] == i]
-        if len(subset_class[:]) < n_sample:
-            subset_class = subset_class.sample(n=n_sample, replace=True, random_state=seed)
+        if resample:
+            if len(subset_class[:]) < n_sample:
+                subset_class = subset_class.sample(n=n_sample, replace=True, random_state=seed)
         subset.append(subset_class[:n_sample])
     subset = pd.concat(subset)
     return subset
@@ -89,8 +90,8 @@ def viz(subset, colormap):
     plt.arrow(0, 1.1, 0, 0, width=0.013, color='black')
 
     # Text for annotation purpose
-    plt.text(0.1, 1.1, 'Valence', fontsize='25', fontweight='bold')
-    plt.text(1.1, -0.1, 'Arousal', fontsize='25', fontweight='bold')
+    plt.text(0.1, 1.1, 'Arousal', fontsize='25', fontweight='bold')
+    plt.text(1.1, -0.1, 'Valence', fontsize='25', fontweight='bold')
 
     plt.tight_layout()
     plt.axis('off') #hide axes and borders
@@ -104,16 +105,19 @@ if __name__ == "__main__":
 
     # Init train
     train = pd.read_csv('./data/train.csv')
+    # print(train)
     # # Plot figure
-    # # viz(train, 'Dark2')
+    # viz(train, 'Dark2')
 
 
     # # Augment + Downsampling
     # # # Apply downsampling
-    n_sample = 25000
+    n_sample = 50000
     seed = 1
-    subset = sample_func(train, n_sample, seed)
+    subset = sample_func(train, n_sample, False, seed)
+    # viz(subset, 'Dark2')
     # print(subset['class'].value_counts())
+    # print(len(subset))
 
     # # # Augmentation
     # HF_4 = augmentation(subset, 4, 'HF')
@@ -124,6 +128,6 @@ if __name__ == "__main__":
     # # Concat all augmentation
     # subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
     # # Split train
-    split_train(subset, seed, 'train_resample_25000', './data/')
-    tmp = pd.read_csv('./data/train_resample_25000.csv')
-    print(tmp)
+    split_train(subset, seed, 'train_downsample_50000', './data/')
+    # tmp = pd.read_csv('./data/train_resample_25000.csv')
+    # print(tmp)

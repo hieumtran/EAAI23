@@ -2,7 +2,7 @@ import numpy as np
 from dataloader import Dataloader
 from procedure import procedure
 import torch
-from design.InvNeXt.model import InvNet
+from design.MobileInvNet.model import MobileInvNet
 from torchvision import transforms
 
 
@@ -32,7 +32,7 @@ def load_data(root, train_reg_frame, test_reg_frame, batch_size, num_workers, su
 
 def main():
     # Data parameters
-    batch_size = 32
+    batch_size = 128
     num_workers = 0
     subset = None
     # subset = 1000
@@ -47,11 +47,24 @@ def main():
     # Model parameters
     start_epoch = 0
     end_epoch = 100
-    save_path = './PyTorch_reg/design/InvNet/InvNet17_1x1_'
+    save_path = './PyTorch_reg/design/MobileInvNet_weight/MobileInvNet_'
     save_fig = './PyTorch_reg/figure/InvNet_aug'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    model = InvNet(3, [64, 128, 256, 512], [1, 1, 1, 1], 0.5, 1).to('cuda')
+    block_setting = [
+                # c, n, s
+                # [32, 1, 1],
+                # [24, 2, 2],
+                [32, 3, 2],
+                [64, 4, 2],
+                [128, 3, 2],
+                [256, 3, 2],
+                [512, 1, 1],
+            ]
+    input_channel = 32
+    final_channel = 512
+
+    model = MobileInvNet(input_channel, final_channel, block_setting, 3).to(device)
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
     print('Total number of parameters: ', pytorch_total_params)
@@ -64,8 +77,8 @@ def main():
                         save_path=save_path, save_fig=save_fig)
     # proceed.load_model('./PyTorch_reg/design/InvNet/InvNet101_aug_68.pt')
     # proceed.test(test_loader)
-    # proceed.fit(train_loader, None)
-    for i in range(0, 101):
-        proceed.load_model('./PyTorch_reg/design/InvNet/InvNet17_1x1_' + str(i) + '.pt')
-        proceed.test(test_loader)
-    proceed.visualize('./PyTorch_reg/figure/InvNet17_aug_loss.jpg')
+    proceed.fit(train_loader, test_loader)
+    # for i in range(0, 51):
+    #     proceed.load_model('./PyTorch_reg/design/InvNet/InvNet18_' + str(i) + '.pt')
+    #     proceed.test(test_loader)
+    # proceed.visualize('./PyTorch_reg/figure/InvNet101_aug_loss.jpg')

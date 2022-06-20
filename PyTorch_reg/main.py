@@ -39,7 +39,7 @@ def main():
     # subset = 1000
     root_dir = './'
     shuffle = False
-    train_reg_frame = "train_downsample_50000_reg.csv"
+    train_reg_frame = "train_subset_20000_reg.csv"
     test_reg_frame = "test_reg.csv"
     train_loader, test_loader = load_data(root=root_dir, train_reg_frame=train_reg_frame, test_reg_frame=test_reg_frame,
                                             batch_size=batch_size, subset=subset, 
@@ -48,12 +48,12 @@ def main():
     # Model parameters
     start_epoch = 0
     end_epoch = 100
-    save_path = './PyTorch_reg/design/InvNet_weight/InvNet50_'
+    save_path = './PyTorch_reg/design/InvNet_weight/InvNet17_small_'
     save_fig = './PyTorch_reg/figure/InvNet_aug'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # model = MobileInvNet(input_channel, final_channel, block_setting, 3).to(device)
-    model = InvNet(3, [16, 32, 64, 256], [3, 4, 6, 2], 0.5, 1).to(device)
+    model = InvNet(3, [16, 32, 64, 256], [1, 1, 1, 1], 0.5, 7).to(device)
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('Total number of parameters: ', pytorch_total_params)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0001)

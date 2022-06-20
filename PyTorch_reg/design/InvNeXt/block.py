@@ -27,7 +27,7 @@ class Block(nn.Module):
         x = self.dropout(self.act(self.pwconv1(x)))
 
         # Second linear layer
-        x = self.dropout(self.pwconv2(x))
+        x = self.pwconv2(x)
 
         x = x.permute(0, 3, 1, 2) # (N, H, W, C) -> (N, C, H, W)
 

@@ -20,12 +20,14 @@ def load_data(root, train_reg_frame, test_reg_frame, batch_size, num_workers, su
                                             transforms.ColorJitter(brightness=(0.5,1.5), contrast=(1), saturation=(0.5,1.5), hue=(-0.1,0.1)),
                                             transforms.RandomErasing()
                                             ], p=0.5)
-    transform = transforms.Compose([transforms.ToTensor(), data_augment,
+    transform_train = transforms.Compose([transforms.ToTensor(), data_augment,
+                                    transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956])])
+    transform_test = transforms.Compose([transforms.ToTensor(),
                                     transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956])])
 
-    train = Dataloader(root=root, image_dir=train_image_dir, label_frame=train_reg_frame, subset=subset, transform=transform,
+    train = Dataloader(root=root, image_dir=train_image_dir, label_frame=train_reg_frame, subset=subset, transform=transform_train,
                        mode='reg').load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-    test = Dataloader(root=root, image_dir=test_image_dir, label_frame=test_reg_frame, subset=subset, transform=transform,
+    test = Dataloader(root=root, image_dir=test_image_dir, label_frame=test_reg_frame, subset=subset, transform=transform_test,
                       mode='reg').load_batch(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
     return train, test
@@ -33,13 +35,13 @@ def load_data(root, train_reg_frame, test_reg_frame, batch_size, num_workers, su
 
 def main():
     # Data parameters
-    batch_size = 256
+    batch_size = 128
     num_workers = 0
     subset = None
     # subset = 1000
     root_dir = './'
     shuffle = False
-    train_reg_frame = "train_subset_20000_reg.csv"
+    train_reg_frame = "train_downsample_50000_reg.csv"
     test_reg_frame = "test_reg.csv"
     train_loader, test_loader = load_data(root=root_dir, train_reg_frame=train_reg_frame, test_reg_frame=test_reg_frame,
                                             batch_size=batch_size, subset=subset, 
@@ -57,13 +59,13 @@ def main():
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('Total number of parameters: ', pytorch_total_params)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0001)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
 
     # procedure init
     proceed = procedure(optimizer=optimizer, scheduler=scheduler, model=model,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    # proceed.load_model('./PyTorch_reg/design/InvNet/InvNet101_aug_68.pt')
+    # proceed.load_model('./PyTorch_reg/design/InvNet_weight/InvNet17_small_30.pt')
     # proceed.test(test_loader)
     proceed.fit(train_loader, test_loader)
     # for i in range(0, 51):

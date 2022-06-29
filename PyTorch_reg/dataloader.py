@@ -96,6 +96,6 @@ class Dataloader():
         """
         
         dataset = Dataset(self.image_dir, self.label_frame, subset=self.subset, transform=self.transform, mode=self.mode)
-        batch_iter = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        batch_iter = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
 
         return batch_iter

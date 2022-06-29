@@ -4,7 +4,6 @@ from procedure import procedure
 import torch
 # from design.MobileInvNet.model import MobileInvNet
 from design.InvNeXt.model import InvNet
-from design.simpleInvolution import simpleInvolution
 from torchvision import transforms
 
 
@@ -36,41 +35,49 @@ def load_data(root, train_reg_frame, test_reg_frame, batch_size, num_workers, su
 
 def main():
     # Data parameters
-    batch_size = 4
+    batch_size = 8
     num_workers = 0
     subset = None
     # subset = 1000
     root_dir = './'
     shuffle = False
-    train_reg_frame = "train_subset_reg.csv"
+    train_reg_frame = "train_subset_20000_reg.csv"
     test_reg_frame = "test_reg.csv"
     train_loader, test_loader = load_data(root=root_dir, train_reg_frame=train_reg_frame, test_reg_frame=test_reg_frame,
                                             batch_size=batch_size, subset=subset, 
                                             num_workers=num_workers, shuffle=shuffle)
 
     # Model parameters
-    start_epoch = 28
-    end_epoch = 100
-    save_path = './PyTorch_reg/design/simpleInvolution/simpletInvolution_'
-    save_fig = './PyTorch_reg/figure/simpletInvolution_aug'
+    start_epoch = 0
+    end_epoch = 51
+    # save_path = './PyTorch_reg/design/InvNet_weight/InvNet152_small_'
+    # save_path = './PyTorch_reg/design/InvNet_weight/InvNet35_small_'
+    save_path = './PyTorch_reg/design/InvNet_weight/InvNet50_'
+    save_fig = './PyTorch_reg/figure/InvNet50_aug'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # model = MobileInvNet(input_channel, final_channel, block_setting, 3).to(device)
-    # model = InvNet(3, [16, 32, 64, 256], [3, 4, 6, 2], 0.5, 13).to(device)
-    model = simpleInvolution(3, 2).to(device)
+    # model = InvNet(3, [32, 64, 128, 256], [3, 8, 36, 3], 0.5, 7).to(device) # InvNet152
+    # model = InvNet(3, [32, 64, 128, 256], [2, 3, 3, 2], 0.5, 7).to(device) # InvNet35
+    model = InvNet(3, [32, 64, 128, 256], [3, 4, 6, 2], 0.5, 7).to(device) # InvNet50
+    # model = simpleInvolution(3, 2).to(device)
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('Total number of parameters: ', pytorch_total_params)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.0001, momentum=0.9, weight_decay=0.0001)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0001)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
 
     # procedure init
     proceed = procedure(optimizer=optimizer, scheduler=scheduler, model=model,
                         start_epoch=start_epoch, end_epoch=end_epoch, device=device,
                         save_path=save_path, save_fig=save_fig)
-    proceed.load_model('./PyTorch_reg/design/simpleInvolution/simpletInvolution_27.pt')
+    # proceed.load_model('./PyTorch_reg/design/InvNet_weight/InvNet17_small_30.pt')
     # proceed.test(test_loader)
-    proceed.fit(train_loader, test_loader)
-    # for i in range(0, 51):
-    #     proceed.load_model('./PyTorch_reg/design/InvNet/InvNet18_' + str(i) + '.pt')
-    #     proceed.test(test_loader)
-    # proceed.visualize('./PyTorch_reg/figure/InvNet101_aug_loss.jpg')
+    # proceed.fit(train_loader, test_loader)
+    for i in range(0, 51):
+        proceed.load_model(save_path + str(i) + '.pt')
+        proceed.test(test_loader)
+    # proceed.visualize('./PyTorch_reg/figure/InvNet152_small_loss.jpg')
+    # proceed.visualize('./PyTorch_reg/figure/InvNet35_small_loss.jpg')
+    proceed.visualize('./PyTorch_reg/figure/InvNet50_small_loss.jpg')
+
+

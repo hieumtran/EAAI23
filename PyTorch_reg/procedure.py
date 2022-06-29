@@ -30,7 +30,7 @@ class procedure:
 
             # Update loss and optimizer
             train_loss = self.train_val_test(train_loader, state='train')
-            self.scheduler.step(train_loss)
+            self.scheduler.step()
             self.train_arr.append(train_loss)
 
             if val_loader != None:

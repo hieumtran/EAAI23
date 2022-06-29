@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import datetime
 from eval_metrics import rmse, pear, ccc, sagr
 from loss_function import L2_dist
+from torch.cuda.amp import GradScaler, autocast
 
 class procedure:
     def __init__(self, optimizer, scheduler,
@@ -20,93 +21,92 @@ class procedure:
         self.save_path = save_path  # Checkpoint directory
         self.save_fig = save_fig  # Figure saving
         self.scheduler = scheduler  # scheduler for optimizer
+        self.scaler = GradScaler() # Grad scaler for faster training time
 
-    def fit(self, train_loader, val_loader):
-        output_template = 'Epoch {} | ' \
-                          'train: {:.8f} | val: {:.8f} | ' \
-                          'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+    def fit(self, train_loader, test_loader):
+        output_template = 'Epoch {} | train: {:.8f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         for epoch in range(self.start_epoch, self.end_epoch + 1):
             epoch_start = timeit.default_timer()
 
             # Update loss and optimizer
-            train_loss = self.train_val_test(train_loader, state='train')
+            train_loss = self.train_val(train_loader, state='train')
             self.scheduler.step()
             self.train_arr.append(train_loss)
 
-            if val_loader != None:
-                val_loss = self.train_val_test(val_loader, state='val')
-                self.val_arr.append(val_loss)
-            else: val_loss = 0
-
             self.save_model(epoch)  # Saving model
-            print(output_template.format(epoch, train_loss, val_loss,
-                                         timeit.default_timer() - epoch_start,
-                                         datetime.datetime.now()))
+            print(output_template.format(epoch, train_loss, timeit.default_timer() - epoch_start, datetime.datetime.now()))
+            self.val(test_loader, epoch)
 
-    def train_val_test(self, loader, state):
-        assert state in ['train', 'test', 'val']
+    def train_val(self, loader, state):
+        assert state in ['train', 'val']
         if state == 'train':
             self.model.train()
             init_log = 'Train '
-        elif state == 'val':
-            self.model.eval()
-            init_log = 'Val '
+            log_template = init_log + 'mini-batch {}: {:.8f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         else:
             self.model.eval()
-            init_log = 'Test '
             
-        log_template = init_log + 'mini-batch {}: {:.8f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+        
         predict = []
         truth = []
-        
+
         # Init computation variables
-        samples, batch_cnt, sum_loss = (0, 0, 0)
-        for (batchX, batchY) in loader:
+        samples, sum_loss = (0, 0)
+        accum_iter = 16
+        self.model.zero_grad()
+        for batch_idx, (batchX, batchY) in enumerate(loader):
             start = timeit.default_timer()
             (batchX, batchY) = (batchX.to(self.device).float(), batchY.to(self.device).float())  # Load data2
-            if state == 'train': self.optimizer.zero_grad()  # Zero grad before mini-batch
+
             pred, loss = self.loss_compute(batchX, batchY)  # Forward model
+            
+            # Normalize loss to account for batch accumulation
+            loss = loss / accum_iter 
 
             # Optimizer step and Backpropagation
             if state == 'train':
-                loss.backward()
-                self.optimizer.step()
+                self.scaler.scale(loss).backward()
+                if ((batch_idx + 1) % accum_iter == 0) or (batch_idx + 1 == len(loader)):
+                    self.scaler.step(self.optimizer)
+                    self.model.zero_grad(set_to_none=True)
+                    self.scaler.update()
+
+                # Logging
+                print(log_template.format(batch_idx, loss.item()*accum_iter, timeit.default_timer() - start, datetime.datetime.now()))
 
             # Loss and samples size for evaluation
-            sum_loss += loss.item() * (2 * batchX.size(0))
+            sum_loss += loss.item() * accum_iter * (2 * batchX.size(0))
             samples += batchX.size(0)  # sample size
-            batch_cnt += 1
+
             
             # Concat predict and truth value
-            if state == 'test':
+            if state == 'val':
                 with torch.no_grad():
                     # Convert to cpu for easier computation
-                    predict.append(pred.to('cpu')) # Unfixed
+                    predict.append(pred.to('cpu'))
                     truth.append(batchY.to('cpu'))
-                    pass
 
-            # Logging
-            print(log_template.format(batch_cnt, loss.item(), timeit.default_timer() - start, datetime.datetime.now()))
-        if state == 'train' or state == 'val': return sum_loss / (2 * samples)
-        else: return sum_loss / (2 * samples), torch.concat(predict), torch.concat(truth)
+        if state == 'train': return sum_loss / (2 * samples)
+        else: return sum_loss / (2 * samples), torch.concat(predict).cpu().detach().numpy(), torch.concat(truth).cpu().detach().numpy()
 
     def loss_compute(self, input, output):
-        input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
-        pred = self.model(input.float())
+        with autocast():
+            input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
+            pred = self.model(input.float())
 
-        output = output.reshape(-1, 2) # Reshape to Nx2
-        loss = L2_dist(pred.float(), output.float())
+            output = output.reshape(-1, 2) # Reshape to Nx2
+            loss = L2_dist(pred.float(), output.float())
 
         return pred, loss
 
-    def test(self, test_loader):
+    def val(self, test_loader, epoch):
         # Unfix test
         start = timeit.default_timer()
-        output_template = 'Test: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | P_Val: {:.8f} | P_Ars: {:.8f} |' \
+        output_template = 'Val {}: {:.8f} | RMSE_Val: {:.8f} | RMSE_Ars: {:.8f} | P_Val: {:.8f} | P_Ars: {:.8f} |' \
                             ' C_Val: {:.8f} | C_Ars: {:.8f} | S_Val: {:.8f} | S_Ars: {:.8f} |' 
         time_template =  'Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         output_template += time_template
-        test_loss, predict, truth = self.train_val_test(test_loader, state='test')
+        test_loss, predict, truth = self.train_val(test_loader, state='val')
         
         truth = truth.reshape(-1, 2)
         rmse_val, rmse_ars = rmse(predict, truth)
@@ -114,7 +114,7 @@ class procedure:
         ccc_val, ccc_ars = ccc(predict, truth)
         sagr_val, sagr_ars = sagr(predict, truth)
         
-        print(output_template.format(test_loss, rmse_val, rmse_ars, pear_val, pear_ars, ccc_val, ccc_ars, sagr_val, sagr_ars,
+        print(output_template.format(epoch, test_loss, rmse_val, rmse_ars, pear_val, pear_ars, ccc_val, ccc_ars, sagr_val, sagr_ars,
                                      timeit.default_timer() - start, datetime.datetime.now()))
 
     def save_model(self, curr_epoch):

@@ -21,6 +21,14 @@ def read_output(read_path, save_loc, save_name):
             corr_val.append(float(tmp_text[10])), corr_ars.append(float(tmp_text[13]))
             ccc_val.append(float(tmp_text[16])), ccc_ars.append(float(tmp_text[19]))
             sagr_val.append(float(tmp_text[22])), sagr_ars.append(float(tmp_text[25]))
+        elif 'Val' in text[i]:
+            tmp_text = text[i].split(' ')
+            loss.append(float(tmp_text[2]))
+            rmse_val.append(float(tmp_text[5])), rmse_ars.append(float(tmp_text[8]))
+            corr_val.append(float(tmp_text[11])), corr_ars.append(float(tmp_text[14]))
+            ccc_val.append(float(tmp_text[17])), ccc_ars.append(float(tmp_text[20]))
+            sagr_val.append(float(tmp_text[23])), sagr_ars.append(float(tmp_text[26]))
+
     
     if os.path.isdir(save_loc) != True: os.mkdir(save_loc)
     
@@ -57,7 +65,7 @@ def viz(arr, title, yaxis, path):
     plt.plot(np.arange(1, len(arr)+1, 1), arr, 'o-')
     
     # X tick
-    plt.xticks(np.arange(1, len(arr)+1, 30))
+    plt.xticks(np.arange(1, len(arr)+1, 5))
     
     # Title and axis label
     plt.ylabel(yaxis)

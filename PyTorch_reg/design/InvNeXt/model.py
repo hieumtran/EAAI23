@@ -4,7 +4,7 @@ from design.InvNeXt.block import Block
 from design.InvNeXt.layer_norm import LayerNorm
 
 class InvNet(nn.Module):
-    def __init__(self, in_channel, dims, num_per_layers, drp_rate, inv_kernel):
+    def __init__(self, in_channel, dims, num_per_layers, dropout_rate, inv_kernel):
         super(InvNet, self).__init__()
 
         self.invnet = []
@@ -18,7 +18,7 @@ class InvNet(nn.Module):
         # Model architecture
         for i in range(len(dims)):
             for _ in range(num_per_layers[i]):
-                self.invnet.append(Block(dims[i], inv_kernel, 1, drp_rate))
+                self.invnet.append(Block(dims[i], inv_kernel, 1, dropout_rate))
                 self.invnet.append(LayerNorm(dims[i], eps=1e-6, data_format="channels_first"))
             if i == len(dims)-1:
                 break
@@ -26,7 +26,6 @@ class InvNet(nn.Module):
             self.invnet.append(LayerNorm(dims[i+1], eps=1e-6, data_format="channels_first"))
         
         self.invnet.append(nn.AdaptiveAvgPool2d((1, 1)))
-        # self.invnet.append(LayerNorm(dims[-1], eps=1e-6, data_format="channels_first"))
         self.invnet = nn.Sequential(*self.invnet)
 
         self.linear = nn.Linear(dims[-1], 2)

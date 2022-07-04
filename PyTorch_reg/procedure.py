@@ -9,7 +9,8 @@ from torch.cuda.amp import GradScaler, autocast
 class procedure:
     def __init__(self, optimizer, scheduler,
                  model, start_epoch, end_epoch,
-                 save_path, save_fig, device):
+                 save_path, save_name,
+                 accumulative_iteration, device):
         self.optimizer = optimizer  # optimizer
         self.scheduler = scheduler  # scheduler for optimizer
         self.model = model  # model init
@@ -18,8 +19,9 @@ class procedure:
         self.end_epoch = end_epoch  # Ending epoch
         self.train_arr = []  # Init training loss
         self.val_arr = []  # Init validation loss
-        self.save_path = save_path  # Checkpoint directory
-        self.save_fig = save_fig  # Figure saving
+        self.save_path = save_path
+        self.save_name = save_name  # Checkpoint directory
+        self.accumulative_iteration = accumulative_iteration # Accumulative iteration
         self.scheduler = scheduler  # scheduler for optimizer
         self.scaler = GradScaler() # Grad scaler for faster training time
 
@@ -52,7 +54,7 @@ class procedure:
 
         # Init computation variables
         samples, sum_loss = (0, 0)
-        accum_iter = 16
+        self.accumulative_iteration = 16
         self.model.zero_grad()
         for batch_idx, (batchX, batchY) in enumerate(loader):
             start = timeit.default_timer()
@@ -61,21 +63,21 @@ class procedure:
             pred, loss = self.loss_compute(batchX, batchY)  # Forward model
             
             # Normalize loss to account for batch accumulation
-            loss = loss / accum_iter 
+            loss = loss / self.accumulative_iteration 
 
             # Optimizer step and Backpropagation
             if state == 'train':
                 self.scaler.scale(loss).backward()
-                if ((batch_idx + 1) % accum_iter == 0) or (batch_idx + 1 == len(loader)):
+                if ((batch_idx + 1) % self.accumulative_iteration == 0) or (batch_idx + 1 == len(loader)):
                     self.scaler.step(self.optimizer)
                     self.model.zero_grad(set_to_none=True)
                     self.scaler.update()
 
                 # Logging
-                print(log_template.format(batch_idx, loss.item()*accum_iter, timeit.default_timer() - start, datetime.datetime.now()))
+                print(log_template.format(batch_idx, loss.item()*self.accumulative_iteration, timeit.default_timer() - start, datetime.datetime.now()))
 
             # Loss and samples size for evaluation
-            sum_loss += loss.item() * accum_iter * (2 * batchX.size(0))
+            sum_loss += loss.item() * self.accumulative_iteration * (2 * batchX.size(0))
             samples += batchX.size(0)  # sample size
 
             
@@ -124,7 +126,7 @@ class procedure:
             'optimizer_state_dict': self.optimizer.state_dict(),
             'train_arr': self.train_arr,
             'val_arr': self.val_arr
-        }, self.save_path + str(curr_epoch) + '.pt')
+        }, f'{self.save_path}{self.save_name}{curr_epoch}.pt')
 
     def load_model(self, load_path):
         ckpt = torch.load(load_path)
@@ -140,4 +142,3 @@ class procedure:
         plt.grid()
         plt.tight_layout()
         plt.savefig(save_fig, dpi=500)
-        # plt.show()

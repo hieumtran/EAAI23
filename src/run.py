@@ -4,7 +4,6 @@ import torch
 import ast
 import os
 
-
 def arg_update(config):
     # Dims
     config.dims = ast.literal_eval(config.dims)
@@ -57,6 +56,8 @@ if __name__ == "__main__":
     parser.add_argument('--mode', choices=('reg', 'class'), default='reg')
     ## Train & Test
     parser.add_argument('--task', choices=('train', 'test'), default='train')
+    ## Transfer file
+    parser.add_argument('--transfer_file', type=str, default='InvNet50_large_AdamW_41.pt')
 
     args = parser.parse_args()
     
@@ -94,7 +95,10 @@ if __name__ == "__main__":
 
         # Train and test configuration
         start_epoch=args.start_epoch,
-        end_epoch=args.end_epoch
+        end_epoch=args.end_epoch, 
+
+        # Transfer learning classification
+        transfer_file=args.transfer_file # Transfer save file
     )
 
     # Argument update

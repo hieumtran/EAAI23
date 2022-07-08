@@ -50,7 +50,6 @@ class Dataset(Dataset):
             return images, labels
         elif self.mode == 'class':
             labels = self.label_frame.iloc[idx, 1]
-            labels = (np.array(labels)).astype("int")
             return images, labels
 
 

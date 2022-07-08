@@ -48,13 +48,11 @@ class procedure:
         else:
             self.model.eval()
             
-        
         predict = []
         truth = []
 
         # Init computation variables
         samples, sum_loss = (0, 0)
-        self.accumulative_iteration = 16
         self.model.zero_grad()
         for batch_idx, (batchX, batchY) in enumerate(loader):
             start = timeit.default_timer()
@@ -79,7 +77,6 @@ class procedure:
             # Loss and samples size for evaluation
             sum_loss += loss.item() * self.accumulative_iteration * (2 * batchX.size(0))
             samples += batchX.size(0)  # sample size
-
             
             # Concat predict and truth value
             if state == 'val':

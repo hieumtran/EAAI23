@@ -42,8 +42,7 @@ if __name__ == "__main__":
     parser.add_argument('--test_input', type=str, default='test_reg.csv')
     ## Procedure
     parser.add_argument('--shuffle', choices=('True', 'False'), default='False')
-    parser.add_argument('--mode', choices=('reg', 'class'), default='reg')
-    parser.add_argument('--subset', default=None)
+    parser.add_argument('--subset', type=int, default=None)
     ## Saving configuration
     parser.add_argument('--save_path', type=str)
     parser.add_argument('--save_name', type=str)
@@ -51,32 +50,54 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--accummulative_iteration', type=int, default=16)
     parser.add_argument('--num_workers', type=int, default=4)
-    # TODO: Test, optim
+    ## Epoch
+    parser.add_argument('--start_epoch', type=int, default=0)
+    parser.add_argument('--end_epoch', type=int, default=50)
+    ## Classification or Regression
+    parser.add_argument('--mode', choices=('reg', 'class'), default='reg')
+    ## Train & Test
+    parser.add_argument('--task', choices=('train', 'test'), default='train')
 
     args = parser.parse_args()
-    # Argument update
+    
 
     config = Namespace(
-        in_channel=args.in_channel,
-        dims=args.dims,
-        num_per_layers=args.num_per_layers,
-        dropout_rate=args.dropout_rate,
-        inv_kernel=args.inv_kernel,
-        batch_size=args.batch_size,
-        accummulative_iteration=args.accummulative_iteration,
-        gpuid=args.gpuid,
-        root=args.root,
-        num_workers=args.num_workers,
-        train_image_dir=args.train_image_dir,
-        test_image_dir=args.test_image_dir,
-        train_input=args.train_input,
-        test_input=args.test_input,
-        shuffle=args.shuffle,
-        mode=args.mode,
-        subset=args.subset,
-        save_path=args.save_path,
-        save_name=args.save_name
+        # Model parameters
+        in_channel=args.in_channel, # Inital input dimension
+        dims=args.dims, # Output dimension
+        num_per_layers=args.num_per_layers, # Number of layers per output dimension
+        dropout_rate=args.dropout_rate, # Dropout rate
+        inv_kernel=args.inv_kernel, # Involution kernel
+        batch_size=args.batch_size, # Batch size
+        accummulative_iteration=args.accummulative_iteration, # Batch increase
+
+        # Computer configuration
+        gpuid=args.gpuid,  # Gpu
+        num_workers=args.num_workers, # Workers for faster datalaoder
+
+        # Data configuration
+        root=args.root, # Data root directory
+        train_image_dir=args.train_image_dir, # Train directory
+        test_image_dir=args.test_image_dir, # Test directory
+        train_input=args.train_input, # Train input file
+        test_input=args.test_input, # Test input file
+        shuffle=args.shuffle, # Shuffle the dataset
+        subset=args.subset, # Subset for testing
+
+        # Mode and task selection
+        mode=args.mode, # class or reg
+        task=args.task, # train or test
+
+        # Weights saving configuration
+        save_path=args.save_path, # Save path
+        save_name=args.save_name, # Save name
+
+        # Train and test configuration
+        start_epoch=args.start_epoch,
+        end_epoch=args.end_epoch
     )
+
+    # Argument update
     arg_update(config)
     main(config)
 

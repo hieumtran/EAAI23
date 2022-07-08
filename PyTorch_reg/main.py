@@ -64,6 +64,7 @@ def main():
     # model = InvNet(3, [32, 64, 128, 256], [1, 1, 1, 1], 0.5, 7).to(device)
     # model = InvNet(3, [64, 128, 256, 512], [3, 4, 6, 2], 0.5, 7).to(device)
     model = InvNet(3, [64, 128, 256, 512], [3, 4, 6, 2], 0.5, 7).to(device) # InvNet50
+    breakpoint()
     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('Total number of parameters: ', pytorch_total_params)
     print('Dataset name: ' + train_reg_frame)

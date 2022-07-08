@@ -1,6 +1,6 @@
 import scipy.stats as scst
 import numpy as np
-import numpy as np
+from sklearn.metrics import f1_score, cohen_kappa_score
 
 # Regression 
 def std_compute(arr):
@@ -39,3 +39,16 @@ def sagr(pred, truth):
     (val_truth, ars_truth) = (np.sign(truth[:, 0]), np.sign(truth[:, 1])) 
     
     return np.sum(val_pred == val_truth) / val_truth.shape[0], np.sum(ars_pred == ars_truth) / ars_truth.shape[0] 
+
+
+# Classification
+def accuracy(pred, truth):
+    return np.count_nonzero(pred == truth) / truth.shape[0]
+
+def f1_score_func(pred, truth):
+    return f1_score(truth, pred, average='weighted')
+
+def cks(pred, truth):
+    return cohen_kappa_score(truth, pred)
+
+# TODO: Krippendorf Alpha, ICC, area under ROC curve (AUC), and area under Precision-Call (AUC-PR)

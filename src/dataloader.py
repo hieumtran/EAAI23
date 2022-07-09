@@ -19,7 +19,7 @@ class Dataset(Dataset):
                 on a sample.
         """
         self.image_dir = image_dir
-        self.label_frame = pd.read_csv(label_frame)
+        self.label_frame = pd.read_csv(label_frame, header=None)
         assert mode in ['reg', 'class', 'both']
         self.mode = mode
         self.transform = transform

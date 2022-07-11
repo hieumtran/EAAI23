@@ -53,15 +53,15 @@ if __name__ == "__main__":
     parser.add_argument('--start_epoch', type=int, default=0)
     parser.add_argument('--end_epoch', type=int, default=50)
     ## Classification or Regression
-    parser.add_argument('--mode', choices=('reg', 'class'), default='reg')
+    parser.add_argument('--mode', choices=('reg', 'class', 'class_reg'), default='reg')
     ## Train & Test
     parser.add_argument('--task', choices=('train', 'test'), default='train')
     ## Transfer file
-    parser.add_argument('--transfer_file', type=str, default='InvNet50_large_AdamW_41.pt')
+    parser.add_argument('--transfer_file', type=str, default=None)
+    parser.add_argument('--optimizer', choices=('Adam', 'SGD'), default='SGD')
 
     args = parser.parse_args()
     
-
     config = Namespace(
         # Model parameters
         in_channel=args.in_channel, # Inital input dimension
@@ -98,7 +98,8 @@ if __name__ == "__main__":
         end_epoch=args.end_epoch, 
 
         # Transfer learning classification
-        transfer_file=args.transfer_file # Transfer save file
+        transfer_file=args.transfer_file, # Transfer save file
+        optimizer=args.optimizer # Switching between Adam and SGD
     )
 
     # Argument update

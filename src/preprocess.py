@@ -104,8 +104,10 @@ if __name__ == "__main__":
     # save_all_train()
 
     # Init train
-    train = pd.read_csv('./data/train.csv')
-    subset = train
+    # train = pd.read_csv('./data/train.csv')
+    # test = pd.read_csv('./data/test.csv', names=['images', 'class', 'val', 'ars'])
+    # train.iloc[:, 1:4].to_csv('./data/train_svm.csv', index=False)
+    # test.iloc[:, 1:4].to_csv('./data/test_svm.csv', index=False)
     # print(train)
     # # Plot figure
     # viz(train, 'Dark2')
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     # # Augment + Downsampling
     # # # Apply downsampling
     # n_sample = 50000
-    seed = 1
+    # seed = 1
     # subset = sample_func(train, n_sample, False, seed)
     # viz(subset, 'Dark2')
     # print(subset['class'].value_counts())
@@ -129,6 +131,7 @@ if __name__ == "__main__":
     # # Concat all augmentation
     # subset = pd.concat([subset, HF_4, CJ_5, HF_5, CJ_7, HF_7]).reset_index(drop=True)
     # # Split train
-    split_train(subset, seed, 'train_all', './data/')
+    # split_train(subset, seed, 'train_all', './data/')
     # tmp = pd.read_csv('./data/train_resample_25000.csv')
     # print(tmp)
+

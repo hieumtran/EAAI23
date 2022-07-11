@@ -20,7 +20,7 @@ class Dataset(Dataset):
         """
         self.image_dir = image_dir
         self.label_frame = pd.read_csv(label_frame, header=None)
-        assert mode in ['reg', 'class', 'both']
+        assert mode in ['reg', 'class', 'class_reg']
         self.mode = mode
         self.transform = transform
         if subset != None: self.label_frame = self.label_frame[:subset]
@@ -31,7 +31,6 @@ class Dataset(Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-
         img_name = os.path.join(self.image_dir,
                                 self.label_frame.iloc[idx, 0])
         images = Image.open(img_name)
@@ -50,6 +49,9 @@ class Dataset(Dataset):
             return images, labels
         elif self.mode == 'class':
             labels = self.label_frame.iloc[idx, 1]
+            return images, labels
+        elif self.mode == 'class_reg':
+            labels = self.label_frame.iloc[idx, 1:].to_numpy().astype('float64')
             return images, labels
 
 

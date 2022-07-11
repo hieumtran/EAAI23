@@ -28,11 +28,16 @@ class InvNet(nn.Module):
         self.invnet.append(nn.AdaptiveAvgPool2d((1, 1)))
         self.invnet = nn.Sequential(*self.invnet)
 
-        self.linear = nn.Linear(dims[-1], 2)
+        self.linear_reg = nn.Linear(dims[-1], 2)
+        self.linear_class = nn.Linear(dims[-1], 8)
+        self.log_softmax = nn.LogSoftmax(dim=1)
  
-    def forward(self, x):
+    def forward(self, x, mode):
         x = self.invnet(x)
         x = x.view(-1, self.dims[-1])
-        return self.linear(x)
+        if mode == 'reg': return self.linear_reg(x)
+        elif mode == 'class': return self.log_softmax(self.linear_class(x))
+        elif mode == 'class_reg': return self.linear_class(x), self.linear_reg(x)
+        else: raise NotImplementedError
 
 

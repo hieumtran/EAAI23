@@ -17,9 +17,14 @@ def load_data(config):
                                             transforms.ColorJitter(brightness=(0.5,1.5), contrast=(1), saturation=(0.5,1.5), hue=(-0.1,0.1)),
                                             transforms.RandomErasing()
                                             ], p=0.5)
-    transform_train = transforms.Compose([transforms.ToTensor(), 
-                                          transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956]), 
-                                          data_augment])
+    if config.augmentation:
+        transform_train = transforms.Compose([transforms.ToTensor(), 
+                                            transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956]),
+                                            data_augment])
+    else:
+        transform_train = transforms.Compose([transforms.ToTensor(), 
+                                            transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956])])
+
     transform_test = transforms.Compose([transforms.ToTensor(), 
                                         transforms.Normalize(mean=[0.5686, 0.4505, 0.3990],std=[0.2332, 0.2064, 0.1956])])
 
@@ -29,7 +34,8 @@ def load_data(config):
         label_frame=config.train_input, 
         subset=config.subset, 
         transform=transform_train,
-        mode=config.mode
+        mode=config.mode,
+        config=config
      ).load_batch(batch_size=config.batch_size, shuffle=config.shuffle, num_workers=config.num_workers)
 
     test = Dataloader(
@@ -38,7 +44,8 @@ def load_data(config):
         label_frame=config.test_input, 
         subset=config.subset, 
         transform=transform_test,
-        mode=config.mode
+        mode=config.mode,
+        config=config
     ).load_batch(batch_size=config.batch_size, shuffle=config.shuffle, num_workers=config.num_workers)
 
     return train, test
@@ -79,8 +86,10 @@ def main(config):
         class_weights=class_weight.compute_class_weight('balanced', classes=np.unique(num_sample), y=num_sample.to_numpy())
         class_weights=torch.tensor(class_weights,dtype=torch.float)
         entropy_loss = torch.nn.CrossEntropyLoss(weight=class_weights.to(config.device))
-
-        loss = (entropy_loss, L2_loss)
+        # entropy_loss = torch.nn.CrossEntropyLoss()
+        mse_loss = torch.nn.MSELoss()
+        # loss = (entropy_loss, L2_loss)
+        loss = (entropy_loss, mse_loss)
 
     pytorch_total_params = sum(p.numel() for p in model.parameters())
     print('Total number of parameters: ', pytorch_total_params)
@@ -94,7 +103,7 @@ def main(config):
     # procedure init
     proceed = procedure(optimizer=optimizer, scheduler=scheduler, loss=loss, model=model,
                         start_epoch=config.start_epoch, end_epoch=config.end_epoch, 
-                        device=config.device, mode=config.mode,
+                        device=config.device, mode=config.mode, val_ars=config.val_ars,
                         save_path=config.save_path, save_name=config.save_name,
                         accumulative_iteration=config.accummulative_iteration)
     

@@ -8,7 +8,7 @@ from torch.cuda.amp import GradScaler, autocast
 class procedure:
     def __init__(self, optimizer, scheduler, loss, model, 
                  start_epoch, end_epoch, mode,
-                 save_path, save_name,
+                 save_path, save_name, val_ars,
                  accumulative_iteration, device):
         self.optimizer = optimizer  # optimizer
         self.scheduler = scheduler  # scheduler for optimizer
@@ -29,9 +29,10 @@ class procedure:
         self.accumulative_iteration = accumulative_iteration # Accumulative iteration
         self.scheduler = scheduler  # scheduler for optimizer
         self.scaler = GradScaler() # Grad scaler for faster training time
+        self.val_ars = val_ars
 
     def fit(self, train_loader, test_loader):
-        output_template = 'Epoch {} | train: {:.2f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+        output_template = 'Epoch {} | train: {:.5f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         for epoch in range(self.start_epoch, self.end_epoch + 1):
             epoch_start = timeit.default_timer()
 
@@ -50,7 +51,7 @@ class procedure:
         if state == 'train':
             self.model.train()
             init_log = 'Train '
-            log_template = init_log + 'mini-batch {}: {:.2f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
+            log_template = init_log + 'mini-batch {}: {:.5f} | Time: {:.5f}s | Current date & Time: {:%Y-%m-%d %H:%M:%S}'
         else:
             self.model.eval()
             
@@ -103,16 +104,34 @@ class procedure:
             pred = self.model(input.float(), self.mode)
 
             if self.mode == 'reg':
-                output = output.reshape(-1, 2) # Reshape to Nx2
+                # output = output.reshape(-1, 2) # Reshape to Nx2
                 loss = self.loss(pred.float(), output.float())
 
             elif self.mode == 'class':
                 loss = self.loss(pred.double(), output.type(torch.LongTensor).to(self.device))
             
             elif self.mode == 'class_reg':
+                # My design
+                # class_loss = self.loss[0](pred[0], output[:, 0].type(torch.LongTensor).to(self.device)) / output.shape[0]
+                # reg_loss = self.loss[1](pred[1].float(), output[:, 1:].float())
+
+                # Classification loss
                 class_loss = self.loss[0](pred[0], output[:, 0].type(torch.LongTensor).to(self.device)) / output.shape[0]
-                reg_loss = self.loss[1](pred[1].float(), output[:, 1:].float())
-                loss = class_loss + reg_loss
+
+                # Regression loss
+                mse_loss = self.loss[1](pred[1].float(), output[:, 1:].float())
+                pcc_val, pcc_ars = pear(pred[1].cpu().detach().numpy(), output[:, 1:].cpu().detach().numpy())
+                pcc_loss = torch.tensor(1 - ((pcc_val + pcc_ars) / 2)).to(self.device)
+                ccc_val, ccc_ars = ccc(pred[1].cpu().detach().numpy(), output[:, 1:].cpu().detach().numpy())
+                ccc_loss = torch.tensor(1 - ((ccc_val + ccc_ars) / 2)).to(self.device)
+                
+                # Shake-shake regularizer
+                shake_regular = torch.rand(3)
+                shake_regular_sum = torch.sum(shake_regular)
+                alpha = shake_regular[0] / shake_regular_sum
+                beta = shake_regular[1] / shake_regular_sum
+                gamma = shake_regular[2] / shake_regular_sum
+                loss = class_loss + alpha*mse_loss + beta*pcc_loss + gamma*ccc_loss 
 
         return pred, loss
 
@@ -124,22 +143,36 @@ class procedure:
         test_loss, predict, truth = self.train_test(test_loader, state='test')
  
         if self.mode == 'reg':            
-            output_template = 'Val {}: {:.2f} | RMSE_Val: {:.2f} | RMSE_Ars: {:.2f} | ' \
-                              'P_Val: {:.2f} | P_Ars: {:.2f} | ' \
-                              'C_Val: {:.2f} | C_Ars: {:.2f} | S_Val: {:.2f} | S_Ars: {:.2f} |'
+            # output_template = 'Val {}: {:.5f} | RMSE_Val: {:.5f} | RMSE_Ars: {:.5f} | ' \
+            #                   'P_Val: {:.5f} | P_Ars: {:.5f} | ' \
+            #                   'C_Val: {:.5f} | C_Ars: {:.5f} | S_Val: {:.5f} | S_Ars: {:.5f} |'
+            # output_template += time_template
+
+            # truth = truth.reshape(-1, 2)
+            # rmse_val, rmse_ars = rmse(predict, truth)
+            # pear_val, pear_ars = pear(predict, truth)
+            # ccc_val, ccc_ars = ccc(predict, truth)
+            # sagr_val, sagr_ars = sagr(predict, truth)
+            
+            # print(output_template.format(epoch, test_loss, rmse_val, rmse_ars, 
+            #                             pear_val, pear_ars, ccc_val, ccc_ars, sagr_val, sagr_ars,
+            #                             timeit.default_timer() - start, datetime.datetime.now()))
+          
+            output_template = 'Val {}: {:.5f} | RMSE: {:.5f} | CORR: {:.5f} | ' \
+                                'CCC: {:.5f} | SAGR: {:.5f} | '
             output_template += time_template
 
-            truth = truth.reshape(-1, 2)
-            rmse_val, rmse_ars = rmse(predict, truth)
-            pear_val, pear_ars = pear(predict, truth)
-            ccc_val, ccc_ars = ccc(predict, truth)
-            sagr_val, sagr_ars = sagr(predict, truth)
+            rmse_value = rmse_1D(predict, truth)
+            pear_value = pear_1D(predict, truth)
+            ccc_value = ccc_1D(predict, truth)
+            sagr_value = sagr_1D(predict, truth)
             
-            print(output_template.format(epoch, test_loss, rmse_val, rmse_ars, 
-                                        pear_val, pear_ars, ccc_val, ccc_ars, sagr_val, sagr_ars,
+            print(output_template.format(epoch, test_loss, rmse_value, pear_value, ccc_value, sagr_value,
                                         timeit.default_timer() - start, datetime.datetime.now()))
+
+
         elif self.mode == 'class': 
-            output_template = 'Val {}: {:.2f} | Accuracy: {:.2f} | F1_score: {:.2f} | '
+            output_template = 'Val {}: {:.5f} | Accuracy: {:.5f} | F1_score: {:.5f} | '
             output_template += time_template
 
             predict = np.argmax(predict, 1)
@@ -150,10 +183,10 @@ class procedure:
                                         timeit.default_timer() - start, datetime.datetime.now()))
         
         elif self.mode == 'class_reg':
-            output_template = 'Val {}: {:.2f} | RMSE_Val: {:.2f} | RMSE_Ars: {:.2f} | ' \
-                                'P_Val: {:.2f} | P_Ars: {:.2f} | ' \
-                                'C_Val: {:.2f} | C_Ars: {:.2f} | S_Val: {:.2f} | S_Ars: {:.2f} | ' \
-                                'Accuracy: {:.2f} | F1_score: {:.2f} | '
+            output_template = 'Val {}: {:.5f} | RMSE_Val: {:.5f} | RMSE_Ars: {:.5f} | ' \
+                                'P_Val: {:.5f} | P_Ars: {:.5f} | ' \
+                                'C_Val: {:.5f} | C_Ars: {:.5f} | S_Val: {:.5f} | S_Ars: {:.5f} | ' \
+                                'Accuracy: {:.5f} | F1_score: {:.5f} | '
             output_template += time_template
 
             rmse_val, rmse_ars = rmse(predict[:, -2:], truth[:, -2:])

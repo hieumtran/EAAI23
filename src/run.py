@@ -14,6 +14,8 @@ def arg_update(config):
     else: config.device = f'cuda:{config.gpuid}' 
     # Shuffle setting
     config.shuffle = False if config.shuffle == 'False' else True
+    # Augmentation
+    config.augmentation = False if config.augmentation == 'False' else True
     # Save folder
     if not os.path.exists(config.save_path): 
         os.makedirs(config.save_path)
@@ -59,6 +61,10 @@ if __name__ == "__main__":
     ## Transfer file
     parser.add_argument('--transfer_file', type=str, default=None)
     parser.add_argument('--optimizer', choices=('Adam', 'SGD'), default='SGD')
+    # Augmentation
+    parser.add_argument('--augmentation', choices=('True', 'False'), default='True')
+    # Valence or arousal
+    parser.add_argument('--val_ars', choices=('val', 'ars'), default='val')
 
     args = parser.parse_args()
     
@@ -99,7 +105,13 @@ if __name__ == "__main__":
 
         # Transfer learning classification
         transfer_file=args.transfer_file, # Transfer save file
-        optimizer=args.optimizer # Switching between Adam and SGD
+        optimizer=args.optimizer, # Switching between Adam and SGD
+
+        # Augmentation
+        augmentation=args.augmentation,
+
+        # Valence and arousal
+        val_ars=args.val_ars
     )
 
     # Argument update

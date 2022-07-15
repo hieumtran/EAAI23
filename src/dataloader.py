@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 # inherit the torch.utils.data.Dataset class
 class Dataset(Dataset):
-    def __init__(self, image_dir, label_frame, mode, subset=None, transform=None):
+    def __init__(self, image_dir, label_frame, mode, config, subset=None, transform=None):
         """
         Args:
             image_dir (string): Directory with all the images.
@@ -24,6 +24,7 @@ class Dataset(Dataset):
         self.mode = mode
         self.transform = transform
         if subset != None: self.label_frame = self.label_frame[:subset]
+        self.config = config
         
     def __len__(self):
         return self.label_frame.shape[0]
@@ -44,8 +45,11 @@ class Dataset(Dataset):
         # plt.savefig('./tmp.jpg')
         
         if self.mode == 'reg':
-            labels = self.label_frame.iloc[idx, 1:]
-            labels = np.array([labels]).astype('float').reshape(-1, 2)
+            if self.config.val_ars == 'val':
+                labels = self.label_frame.iloc[idx, 1]
+            elif self.config.val_ars == 'ars':
+                labels = self.label_frame.iloc[idx, 2]
+            labels = np.array([labels]).astype('float').reshape(-1)
             return images, labels
         elif self.mode == 'class':
             labels = self.label_frame.iloc[idx, 1]
@@ -57,9 +61,9 @@ class Dataset(Dataset):
 
 class Dataloader():
     def __init__(
-        self, root, image_dir, label_frame,
+        self, root, image_dir, label_frame, config,
         transform=None,
-        mode=None, subset = None
+        mode=None, subset = None,
     ):
         """
         Args:
@@ -77,6 +81,7 @@ class Dataloader():
         self.mode = mode
         self.transform = transform
         self.subset = subset
+        self.config = config
 
     def load_batch(self, batch_size, shuffle=False, num_workers=0):
         """
@@ -90,7 +95,7 @@ class Dataloader():
                 will return the corresponding batchX, batchY.
         """
         
-        dataset = Dataset(self.image_dir, self.label_frame, subset=self.subset, transform=self.transform, mode=self.mode)
+        dataset = Dataset(self.image_dir, self.label_frame, subset=self.subset, config=self.config, transform=self.transform, mode=self.mode)
         batch_iter = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
 
         return batch_iter

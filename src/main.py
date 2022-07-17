@@ -72,7 +72,7 @@ def main(config):
     print('Dataset name: ' + config.train_input)
 
     # Trasnfer learning for classification
-    if config.mode == 'reg':
+    if config.mode == 'reg' or config.mode == 'reg_one':
         loss = L2_loss
 
     elif config.mode == 'class':

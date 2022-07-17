@@ -20,7 +20,6 @@ class Dataset(Dataset):
         """
         self.image_dir = image_dir
         self.label_frame = pd.read_csv(label_frame, header=None)
-        assert mode in ['reg', 'class', 'class_reg']
         self.mode = mode
         self.transform = transform
         if subset != None: self.label_frame = self.label_frame[:subset]

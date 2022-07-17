@@ -37,6 +37,7 @@ class InvNet(nn.Module):
         x = self.invnet(x)
         x = x.view(-1, self.dims[-1])
         if mode == 'reg': return self.linear_reg(x)
+        elif mode == 'reg_one': return self.linear_reg_one(x)
         elif mode == 'class': return self.log_softmax(self.linear_class(x))
         elif mode == 'class_reg': return self.linear_class(x), self.linear_reg(x)
         else: raise NotImplementedError

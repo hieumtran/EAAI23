@@ -28,7 +28,8 @@ class InvNet(nn.Module):
         self.invnet.append(nn.AdaptiveAvgPool2d((1, 1)))
         self.invnet = nn.Sequential(*self.invnet)
 
-        self.linear_reg = nn.Linear(dims[-1], 1)
+        self.linear_reg_one = nn.Linear(dims[-1], 1)
+        self.linear_reg = nn.Linear(dims[-1], 2)
         self.linear_class = nn.Linear(dims[-1], 8)
         self.log_softmax = nn.LogSoftmax(dim=1)
  

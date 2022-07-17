@@ -103,18 +103,14 @@ class procedure:
             input = torch.reshape(input, (-1, 3, 224, 224))  # Reshape to NxCxHxW
             pred = self.model(input.float(), self.mode)
 
-            if self.mode == 'reg':
-                # output = output.reshape(-1, 2) # Reshape to Nx2
+            if self.mode == 'reg_one':
                 loss = self.loss(pred.float(), output.float())
-
+            elif self.mode == 'reg':
+                output = output.reshape(-1, 2) # Reshape to Nx2
+                loss = self.loss(pred.float(), output.float())
             elif self.mode == 'class':
                 loss = self.loss(pred.double(), output.type(torch.LongTensor).to(self.device))
-            
             elif self.mode == 'class_reg':
-                # My design
-                # class_loss = self.loss[0](pred[0], output[:, 0].type(torch.LongTensor).to(self.device)) / output.shape[0]
-                # reg_loss = self.loss[1](pred[1].float(), output[:, 1:].float())
-
                 # Classification loss
                 class_loss = self.loss[0](pred[0], output[:, 0].type(torch.LongTensor).to(self.device)) / output.shape[0]
 
@@ -143,21 +139,21 @@ class procedure:
         test_loss, predict, truth = self.train_test(test_loader, state='test')
  
         if self.mode == 'reg':            
-            # output_template = 'Val {}: {:.5f} | RMSE_Val: {:.5f} | RMSE_Ars: {:.5f} | ' \
-            #                   'P_Val: {:.5f} | P_Ars: {:.5f} | ' \
-            #                   'C_Val: {:.5f} | C_Ars: {:.5f} | S_Val: {:.5f} | S_Ars: {:.5f} |'
-            # output_template += time_template
+            output_template = 'Val {}: {:.5f} | RMSE_Val: {:.5f} | RMSE_Ars: {:.5f} | ' \
+                              'P_Val: {:.5f} | P_Ars: {:.5f} | ' \
+                              'C_Val: {:.5f} | C_Ars: {:.5f} | S_Val: {:.5f} | S_Ars: {:.5f} |'
+            output_template += time_template
 
-            # truth = truth.reshape(-1, 2)
-            # rmse_val, rmse_ars = rmse(predict, truth)
-            # pear_val, pear_ars = pear(predict, truth)
-            # ccc_val, ccc_ars = ccc(predict, truth)
-            # sagr_val, sagr_ars = sagr(predict, truth)
+            truth = truth.reshape(-1, 2)
+            rmse_val, rmse_ars = rmse(predict, truth)
+            pear_val, pear_ars = pear(predict, truth)
+            ccc_val, ccc_ars = ccc(predict, truth)
+            sagr_val, sagr_ars = sagr(predict, truth)
             
-            # print(output_template.format(epoch, test_loss, rmse_val, rmse_ars, 
-            #                             pear_val, pear_ars, ccc_val, ccc_ars, sagr_val, sagr_ars,
-            #                             timeit.default_timer() - start, datetime.datetime.now()))
-          
+            print(output_template.format(epoch, test_loss, rmse_val, rmse_ars, 
+                                        pear_val, pear_ars, ccc_val, ccc_ars, sagr_val, sagr_ars,
+                                        timeit.default_timer() - start, datetime.datetime.now()))
+        elif self.mode == 'reg_one':
             output_template = 'Val {}: {:.5f} | RMSE: {:.5f} | CORR: {:.5f} | ' \
                                 'CCC: {:.5f} | SAGR: {:.5f} | '
             output_template += time_template
@@ -169,8 +165,6 @@ class procedure:
             
             print(output_template.format(epoch, test_loss, rmse_value, pear_value, ccc_value, sagr_value,
                                         timeit.default_timer() - start, datetime.datetime.now()))
-
-
         elif self.mode == 'class': 
             output_template = 'Val {}: {:.5f} | Accuracy: {:.5f} | F1_score: {:.5f} | '
             output_template += time_template
@@ -181,7 +175,6 @@ class procedure:
 
             print(output_template.format(epoch, test_loss, acc, f1_score, 
                                         timeit.default_timer() - start, datetime.datetime.now()))
-        
         elif self.mode == 'class_reg':
             output_template = 'Val {}: {:.5f} | RMSE_Val: {:.5f} | RMSE_Ars: {:.5f} | ' \
                                 'P_Val: {:.5f} | P_Ars: {:.5f} | ' \

@@ -55,7 +55,7 @@ if __name__ == "__main__":
     parser.add_argument('--start_epoch', type=int, default=0)
     parser.add_argument('--end_epoch', type=int, default=50)
     ## Classification or Regression
-    parser.add_argument('--mode', choices=('reg', 'class', 'class_reg'), default='reg')
+    parser.add_argument('--mode', choices=('reg', 'reg_one', 'class', 'class_reg'), default='reg')
     ## Train & Test
     parser.add_argument('--task', choices=('train', 'test'), default='train')
     ## Transfer file

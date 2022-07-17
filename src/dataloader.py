@@ -44,12 +44,16 @@ class Dataset(Dataset):
         # # plt.imshow(np.transpose(images[0].cpu().detach().numpy(), (1, 2, 0)))
         # plt.savefig('./tmp.jpg')
         
-        if self.mode == 'reg':
+        if self.mode == 'reg_one':
             if self.config.val_ars == 'val':
                 labels = self.label_frame.iloc[idx, 1]
             elif self.config.val_ars == 'ars':
                 labels = self.label_frame.iloc[idx, 2]
             labels = np.array([labels]).astype('float').reshape(-1)
+            return images, labels
+        elif self.mode == 'reg':
+            labels = self.label_frame.iloc[idx, 1:]
+            labels = np.array([labels]).astype('float').reshape(-1, 2)
             return images, labels
         elif self.mode == 'class':
             labels = self.label_frame.iloc[idx, 1]

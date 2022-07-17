@@ -86,7 +86,6 @@ def main(config):
         class_weights=class_weight.compute_class_weight('balanced', classes=np.unique(num_sample), y=num_sample.to_numpy())
         class_weights=torch.tensor(class_weights,dtype=torch.float)
         entropy_loss = torch.nn.CrossEntropyLoss(weight=class_weights.to(config.device))
-        # entropy_loss = torch.nn.CrossEntropyLoss()
         mse_loss = torch.nn.MSELoss()
         # loss = (entropy_loss, L2_loss)
         loss = (entropy_loss, mse_loss)
